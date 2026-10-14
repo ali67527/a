@@ -2,12 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>حرب الدجاج المائية 🐔💦</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Lalezar&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.2">
+  <link rel="stylesheet" href="style.css?v=2.4">
+  <script>
+    if (window.location.hash || window.location.search) {
+      const q = (window.location.hash + ' ' + window.location.search).toLowerCase();
+      if (q.includes('training') || q.includes('combat') || q.includes('lobby') || q.includes('admin')) {
+        document.write('<style>#splashScreen{display:none!important}</style>');
+      }
+    }
+  </script>
 </head>
 <body>
   <canvas id="game"></canvas>
@@ -157,12 +165,52 @@
     <span id="saveToastText">تم الحفظ تلقائياً!</span>
   </div>
 
-  <!-- ===== Touch controls ===== -->
+  <!-- ===== Touch controls (Auto-Active on Mobile / Touch Devices) ===== -->
   <div id="touchUI" class="hidden">
-    <button id="tPause" class="tbtn small">⏸</button>
-    <button id="tSwap" class="tbtn">🔄</button>
-    <button id="tReload" class="tbtn">💧</button>
-    <button id="tDash" class="tbtn big">💨</button>
+    <!-- Left Virtual Joystick Zone -->
+    <div id="touchJoyZone" class="touch-joy-zone">
+      <div id="touchJoyBase" class="touch-joy-base">
+        <div id="touchJoyKnob" class="touch-joy-knob"></div>
+      </div>
+    </div>
+
+    <!-- Top Touch Shortcuts (Pause & Shop) -->
+    <div class="touch-top-bar">
+      <button id="tPause" class="tbtn tbtn-util" title="إيقاف مؤقت">⏸</button>
+      <button id="tShopMobile" class="tbtn tbtn-util" title="الدكان">🛒</button>
+    </div>
+
+    <!-- Right Action Combat Cluster -->
+    <div class="touch-action-cluster">
+      <!-- Big Primary Fire / Water Spray Button -->
+      <button id="tFire" class="tbtn tbtn-fire" title="إطلاق الماء / رش">
+        <span class="tbtn-icon">💧</span>
+        <span class="tbtn-txt" id="txtTouchFire">رشّ</span>
+      </button>
+
+      <!-- Dash Button -->
+      <button id="tDash" class="tbtn tbtn-dash" title="اندفاع سريع">
+        <span class="tbtn-icon">💨</span>
+        <div id="tDashCdFill" class="tbtn-cd-fill"></div>
+      </button>
+
+      <!-- Reload Button -->
+      <button id="tReload" class="tbtn tbtn-reload" title="تعبئة الخزان">
+        <span class="tbtn-icon">🔄</span>
+        <span class="tbtn-sub">ماء</span>
+      </button>
+
+      <!-- Quick Weapon Swap -->
+      <button id="tSwap" class="tbtn tbtn-swap" title="تبديل السلاح">
+        <span id="tSwapIcon" class="tbtn-icon">🔫</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Subtle Portrait Orientation Hint Banner for Mobile -->
+  <div id="mobileRotateHint" class="mobile-rotate-hint hidden">
+    <span id="txtRotateHint">🔄 لأفضل تجربة وتكتيك، يُنصح بتدوير الهاتف بالعرض (Landscape)</span>
+    <button id="btnCloseRotateHint" class="btn-close-hint">✕</button>
   </div>
 
   <!-- ===== Initial Title / Splash Screen (Fortnite Style Cover) ===== -->
@@ -626,6 +674,6 @@
 
   <script src="js/audio.js"></script>
   <script src="js/draw.js"></script>
-  <script src="js/game.js?v=2.2"></script>
+  <script src="js/game.js?v=2.4"></script>
 </body>
 </html>

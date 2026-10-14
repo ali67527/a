@@ -78,6 +78,8 @@ const I18N = {
     buffShield: 'مظلة',
     buffRapid: 'جنون',
     autoSaved: 'تم الحفظ تلقائياً! 💾',
+    touchFire: 'رشّ',
+    rotateHint: '🔄 لأفضل تجربة وتكتيك، يُنصح بتدوير الهاتف بالعرض (Landscape)',
     runResumed: 'تم استئناف المعركة بنجاح! ⚔️',
     shopTitlePrefix: '🛒 دكان',
     shopCoinsLabel: '(النقود)',
@@ -272,6 +274,8 @@ const I18N = {
     buffShield: 'Shield',
     buffRapid: 'Rapid',
     autoSaved: 'Saved Automatically! 💾',
+    touchFire: 'FIRE',
+    rotateHint: '🔄 For best tactical experience, rotate phone to Landscape',
     runResumed: 'Battle resumed successfully! ⚔️',
     shopTitlePrefix: '🛒 Shop:',
     shopCoinsLabel: '(Coins)',
@@ -501,6 +505,10 @@ function updateAllDOMTranslations() {
   if (hudShop) hudShop.textContent = t('hudShop');
   const hudDash = $('txtHudDash');
   if (hudDash) hudDash.textContent = t('hudDash');
+  const txtTouchFire = $('txtTouchFire');
+  if (txtTouchFire) txtTouchFire.textContent = t('touchFire');
+  const txtRotateHint = $('txtRotateHint');
+  if (txtRotateHint) txtRotateHint.textContent = t('rotateHint');
 
   const shopCoinsLbl = $('txtShopCoinsLabel');
   if (shopCoinsLbl) shopCoinsLbl.textContent = t('shopCoinsLabel');
@@ -1088,14 +1096,54 @@ const PICKUP_EMOJI = { coin: '🌽', heart: '❤️', triple: '🔱', speed: '�
 // ---------- Canvas ----------
 const canvas = $('game');
 const ctx = canvas.getContext('2d');
+// ---------- Device Detection & Responsive Screen Management ----------
+let isMobileDevice = false;
+let usingTouch = false;
+function updateDeviceDetection() {
+  const isTouch = ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0) ||
+    (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) ||
+    (window.innerWidth <= 860 && window.innerHeight <= 460) ||
+    (window.innerWidth <= 500 && window.innerHeight <= 950);
+
+  isMobileDevice = !!isTouch;
+  document.body.classList.toggle('is-mobile', isMobileDevice);
+
+  const isPortrait = window.innerHeight > window.innerWidth;
+  document.body.classList.toggle('is-portrait', isPortrait);
+  document.body.classList.toggle('is-landscape', !isPortrait);
+
+  if (isMobileDevice) {
+    usingTouch = true;
+  }
+}
+
+function checkRotateHint() {
+  const hint = $('mobileRotateHint');
+  if (!hint) return;
+  if (isMobileDevice && (window.innerHeight > window.innerWidth) && !sessionStorage.getItem('cww_dismiss_rotate')) {
+    hint.classList.remove('hidden');
+  } else {
+    hint.classList.add('hidden');
+  }
+}
+
 let VW = 0, VH = 0, DPR = 1, ZOOM = 1;
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 2);
   VW = window.innerWidth; VH = window.innerHeight;
   canvas.width = Math.floor(VW * DPR); canvas.height = Math.floor(VH * DPR);
-  ZOOM = clamp(Math.min(VW / 1200, VH / 760), 0.5, 1.25);
+  updateDeviceDetection();
+  if (isMobileDevice) {
+    ZOOM = clamp(Math.min(VW / 850, VH / 520), 0.65, 1.15);
+  } else {
+    ZOOM = clamp(Math.min(VW / 1200, VH / 760), 0.5, 1.25);
+  }
+  checkRotateHint();
 }
 window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => { setTimeout(resize, 100); });
 resize();
 
 // ---------- State ----------
@@ -1265,7 +1313,51 @@ let bgCanvas = buildBackground(WORLD.w, WORLD.h, 0);
 const keys = {};
 const mouse = { sx: VW / 2, sy: VH / 2, down: false };
 const touch = { move: { id: null, ox: 0, oy: 0, x: 0, y: 0 }, aim: { id: null, ox: 0, oy: 0, x: 0, y: 0 } };
-let usingTouch = false;
+usingTouch = !!isMobileDevice;
+
+// Modern Mobile Virtual Joystick & Combat Action State
+const touchJoy = {
+  active: false,
+  pointerId: null,
+  baseX: 0,
+  baseY: 0,
+  dirX: 0,
+  dirY: 0,
+  mag: 0
+};
+
+const touchFire = {
+  active: false,
+  pointerId: null,
+  startX: 0,
+  startY: 0,
+  isDragging: false,
+  aimAngle: 0
+};
+
+function updateJoyDOM() {
+  const base = $('touchJoyBase');
+  const knob = $('touchJoyKnob');
+  if (!base || !knob) return;
+  if (touchJoy.active) {
+    base.style.opacity = '1';
+    knob.style.transform = `translate(calc(-50% + ${touchJoy.dirX * touchJoy.mag * 32}px), calc(-50% + ${touchJoy.dirY * touchJoy.mag * 32}px))`;
+  } else {
+    base.style.opacity = '0.5';
+    knob.style.transform = 'translate(-50%, -50%)';
+  }
+}
+
+function findNearestTarget(p, maxDist = 650) {
+  if (!enemies || enemies.length === 0) return null;
+  let nearest = null, minDist = maxDist;
+  for (const e of enemies) {
+    if (e.dead || e.hp <= 0) continue;
+    const d = Math.hypot(e.x - p.x, e.y - p.y);
+    if (d < minDist) { minDist = d; nearest = e; }
+  }
+  return nearest;
+}
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
@@ -1294,33 +1386,106 @@ window.addEventListener('blur', () => {
   if (state === 'playing' && player && !player.dead) pauseGame();
 });
 
+// Canvas pointer down: handles desktop mouse clicks and canvas free aim on touch
 canvas.addEventListener('pointerdown', e => {
   Sfx.init();
   if (e.pointerType === 'touch') {
     if (!usingTouch) { usingTouch = true; $('touchUI').classList.remove('hidden'); }
+    if (!isMobileDevice) { isMobileDevice = true; document.body.classList.add('is-mobile'); }
     const s = { id: e.pointerId, ox: e.clientX, oy: e.clientY, x: e.clientX, y: e.clientY };
-    if (e.clientX < VW / 2 && touch.move.id === null) touch.move = s;
-    else if (touch.aim.id === null) touch.aim = s;
+    if (e.clientX < VW * 0.45 && touch.move.id === null && !touchJoy.active) {
+      touch.move = s;
+    } else if (touch.aim.id === null) {
+      touch.aim = s;
+    }
   } else {
     mouse.sx = e.clientX; mouse.sy = e.clientY;
     if (e.button === 0) mouse.down = true;
   }
 });
+
+// Left joystick touch zone listeners
+const joyZone = $('touchJoyZone');
+if (joyZone) {
+  joyZone.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    Sfx.init();
+    touchJoy.active = true;
+    touchJoy.pointerId = e.pointerId;
+    touchJoy.baseX = e.clientX;
+    touchJoy.baseY = e.clientY;
+    const base = $('touchJoyBase');
+    if (base) {
+      base.style.left = `${e.clientX - 60}px`;
+      base.style.top = `${e.clientY - 60}px`;
+      base.style.bottom = 'auto';
+    }
+    touchJoy.dirX = 0; touchJoy.dirY = 0; touchJoy.mag = 0;
+    updateJoyDOM();
+  });
+}
+
+// Window pointer move
 window.addEventListener('pointermove', e => {
-  if (e.pointerType === 'touch') {
+  if (touchJoy.active && e.pointerId === touchJoy.pointerId) {
+    const dx = e.clientX - touchJoy.baseX;
+    const dy = e.clientY - touchJoy.baseY;
+    const dist = Math.hypot(dx, dy);
+    const maxR = 45;
+    if (dist > 3) {
+      touchJoy.dirX = dx / dist;
+      touchJoy.dirY = dy / dist;
+      touchJoy.mag = Math.min(1, dist / maxR);
+    } else {
+      touchJoy.dirX = 0; touchJoy.dirY = 0; touchJoy.mag = 0;
+    }
+    updateJoyDOM();
+  } else if (touchFire.active && e.pointerId === touchFire.pointerId) {
+    const dx = e.clientX - touchFire.startX;
+    const dy = e.clientY - touchFire.startY;
+    if (dx * dx + dy * dy > 14 * 14) {
+      touchFire.isDragging = true;
+      touchFire.aimAngle = Math.atan2(dy, dx);
+    }
+  } else if (e.pointerType === 'touch') {
     if (touch.move.id === e.pointerId) { touch.move.x = e.clientX; touch.move.y = e.clientY; }
     if (touch.aim.id === e.pointerId) { touch.aim.x = e.clientX; touch.aim.y = e.clientY; }
-  } else { mouse.sx = e.clientX; mouse.sy = e.clientY; }
+  } else {
+    mouse.sx = e.clientX; mouse.sy = e.clientY;
+  }
 });
+
+// Pointer up and cancel
 const endPointer = e => {
+  if (touchJoy.active && e.pointerId === touchJoy.pointerId) {
+    touchJoy.active = false;
+    touchJoy.pointerId = null;
+    touchJoy.dirX = 0; touchJoy.dirY = 0; touchJoy.mag = 0;
+    const base = $('touchJoyBase');
+    if (base) {
+      base.style.left = '';
+      base.style.top = '';
+      base.style.bottom = '';
+    }
+    updateJoyDOM();
+  }
+  if (touchFire.active && e.pointerId === touchFire.pointerId) {
+    touchFire.active = false;
+    touchFire.pointerId = null;
+    touchFire.isDragging = false;
+  }
   if (e.pointerType === 'touch') {
     if (touch.move.id === e.pointerId) touch.move.id = null;
     if (touch.aim.id === e.pointerId) touch.aim.id = null;
-  } else if (e.button === 0 || e.type === 'pointercancel') mouse.down = false;
+  } else if (e.button === 0 || e.type === 'pointercancel') {
+    mouse.down = false;
+  }
 };
 window.addEventListener('pointerup', endPointer);
 window.addEventListener('pointercancel', endPointer);
 canvas.addEventListener('contextmenu', e => e.preventDefault());
+
 let wheelLock = 0;
 window.addEventListener('wheel', e => {
   if (state !== 'playing' || !player) return;
@@ -1331,12 +1496,40 @@ window.addEventListener('wheel', e => {
 }, { passive: true });
 
 function bindTouchBtn(id, fn) {
-  $(id).addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); Sfx.init(); fn(); });
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); Sfx.init(); fn(); });
 }
+
+// Dedicated Mobile Fire Button
+const fireBtn = $('tFire');
+if (fireBtn) {
+  fireBtn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    Sfx.init();
+    touchFire.active = true;
+    touchFire.pointerId = e.pointerId;
+    touchFire.startX = e.clientX;
+    touchFire.startY = e.clientY;
+    touchFire.isDragging = false;
+    if (state === 'playing' && player && !player.dead) playerShoot();
+  });
+}
+
 bindTouchBtn('tDash', () => tryDash());
 bindTouchBtn('tReload', () => startReload());
 bindTouchBtn('tSwap', () => cycleWeapon(1));
 bindTouchBtn('tPause', () => { if (state === 'playing') pauseGame(); });
+bindTouchBtn('tShopMobile', () => { if (state === 'playing') openShop(); });
+
+if ($('btnCloseRotateHint')) {
+  $('btnCloseRotateHint').onclick = () => {
+    const hint = $('mobileRotateHint');
+    if (hint) hint.classList.add('hidden');
+    sessionStorage.setItem('cww_dismiss_rotate', '1');
+  };
+}
 
 function screenToWorld(sx, sy) {
   return { x: (sx - VW / 2) / ZOOM + cam.x, y: (sy - VH / 2) / ZOOM + cam.y };
@@ -2416,7 +2609,10 @@ function updatePlayer(dt) {
   if (keys.KeyS || keys.ArrowDown) my += 1;
   if (keys.KeyA || keys.ArrowLeft) mx -= 1;
   if (keys.KeyD || keys.ArrowRight) mx += 1;
-  if (touch.move.id !== null) {
+  if (touchJoy.active) {
+    mx = touchJoy.dirX * touchJoy.mag;
+    my = touchJoy.dirY * touchJoy.mag;
+  } else if (touch.move.id !== null) {
     mx = (touch.move.x - touch.move.ox) / 55; my = (touch.move.y - touch.move.oy) / 55;
     const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   } else { const l = Math.hypot(mx, my); if (l > 0) { mx /= l; my /= l; } }
@@ -2433,13 +2629,27 @@ function updatePlayer(dt) {
   p.moving = Math.hypot(p.vx, p.vy) > 30;
   collideWorld(p);
 
-  // aim
+  // aim & fire
   let firing = false;
   if (usingTouch) {
-    if (touch.aim.id !== null) {
+    if (touchFire.active) {
+      firing = true;
+      if (touchFire.isDragging) {
+        p.aim = touchFire.aimAngle;
+      } else {
+        const target = findNearestTarget(p, 650);
+        if (target) {
+          p.aim = Math.atan2(target.y - p.y, target.x - p.x);
+        } else if (p.moving) {
+          p.aim = Math.atan2(p.vy, p.vx);
+        }
+      }
+    } else if (touch.aim.id !== null) {
       const dx = touch.aim.x - touch.aim.ox, dy = touch.aim.y - touch.aim.oy;
       if (dx * dx + dy * dy > 15 * 15) { p.aim = Math.atan2(dy, dx); firing = true; }
-    } else if (p.moving) p.aim = Math.atan2(p.vy, p.vx);
+    } else if (p.moving) {
+      p.aim = Math.atan2(p.vy, p.vx);
+    }
   } else {
     const m = screenToWorld(mouse.sx, mouse.sy);
     p.aim = Math.atan2(m.y - p.y, m.x - p.x);
@@ -2811,6 +3021,14 @@ function updateHUD() {
   if (p.reloading > 0) { setWidth('ammoFill', 1 - p.reloading / p.reloadMax); setText('ammoText', t('reloading')); }
   else { setWidth('ammoFill', p.ammo[w.id] / mag); setText('ammoText', p.ammo[w.id] + ' / ' + mag); }
   setWidth('dashFill', 1 - Math.max(0, p.dashCd) / (p.chicken === 'astro' ? 0.45 : 0.85));
+  if ($('tDashCdFill')) {
+    const cdMax = (p.chicken === 'astro' ? 0.45 : 0.85);
+    const cdPct = Math.max(0, p.dashCd) / cdMax;
+    $('tDashCdFill').style.height = (cdPct * 100) + '%';
+  }
+  if ($('tSwapIcon')) {
+    $('tSwapIcon').textContent = w.icon;
+  }
   buildSlots();
   if (combo >= 2) {
     setHTML('combo', t('comboText', combo, comboMult().toFixed(1)));
@@ -2831,7 +3049,7 @@ function showBanner(title, sub) {
   const b = $('banner');
   $('bannerTitle').textContent = title; $('bannerSub').textContent = sub || '';
   b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
-  clearTimeout(bannerTO); bannerTO = setTimeout(() => b.classList.remove('show'), 2600);
+  clearTimeout(bannerTO); bannerTO = setTimeout(() => b.classList.remove('show'), isMobileDevice ? 1500 : 2500);
 }
 
 // ---------- Screens / flow ----------
@@ -2842,6 +3060,7 @@ function showScreen(id) {
   }
   $('hud').classList.toggle('hidden', !(state === 'playing' || state === 'paused'));
   $('touchUI').classList.toggle('hidden', !(usingTouch && state === 'playing'));
+  checkRotateHint();
 }
 
 function captureCurrentRun(inShop = false) {
@@ -2859,6 +3078,7 @@ function captureCurrentRun(inShop = false) {
     ammo: Object.assign({}, player.ammo),
     up: Object.assign({}, player.up),
     inShop: inShop,
+    waveActive: !!waveActive,
     chicken: player.chicken || selectedChickenId,
     worldIndex: currentWorldIndex,
     timestamp: Date.now()
@@ -3367,6 +3587,7 @@ function resumeSavedRun() {
   cam.x = player.x; cam.y = player.y;
 
   showSaveToast(t('runResumed'));
+  waveActive = !!run.waveActive;
   if (run.inShop) {
     openShop();
   } else {
@@ -3541,11 +3762,20 @@ function returnToGameFromShop() {
 function openShop() {
   state = 'shop'; mouse.down = false;
   autoSaveRun(true);
+  const isMidWave = !!waveActive;
   if ($('btnShopResume')) {
-    $('btnShopResume').textContent = waveActive ? t('shopReturnBattle', wave) : t('shopReturnField');
+    $('btnShopResume').textContent = isMidWave ? t('shopReturnBattle', wave) : t('shopReturnField');
+    $('btnShopResume').classList.toggle('pulse-glow', isMidWave);
   }
   if ($('btnNext')) {
-    $('btnNext').textContent = waveActive ? t('shopSkipWave') : t('shopNextWave');
+    if (isMidWave && !isAdminMode) {
+      // In normal Battle Royale: Skipping active wave is strictly prohibited!
+      // The player must return to battle and clear the chickens themselves.
+      $('btnNext').classList.add('hidden');
+    } else {
+      $('btnNext').classList.remove('hidden');
+      $('btnNext').textContent = isMidWave ? t('shopSkipWave') : t('shopNextWave');
+    }
   }
   renderShop(); showScreen('shop');
 }
@@ -3604,7 +3834,16 @@ function renderShop() {
   btn.onclick = () => { if (coins < hp) return; coins -= hp; player.hp = player.maxHp; Sfx.pickup(); autoSaveRun(true); renderShop(); };
   card.appendChild(btn); ud.appendChild(card);
 }
-function nextWave() { state = 'playing'; showScreen(null); lastT = performance.now(); startWave(); }
+function nextWave() {
+  if (waveActive && !isAdminMode) {
+    returnToGameFromShop();
+    return;
+  }
+  state = 'playing';
+  showScreen(null);
+  lastT = performance.now();
+  startWave();
+}
 
 function gameOver() {
   player.dead = true; overTimer = 1.8;
@@ -3651,10 +3890,18 @@ function updateAudioButtons() {
   const mOn = Sfx.musicOn;
   const sOn = Sfx.sfxOn;
   for (const b of document.querySelectorAll('.musicBtn')) {
-    b.textContent = mOn ? t('musicOn') : t('musicOff');
+    if (b.closest('.lobby-topbar')) {
+      b.textContent = mOn ? '🎵' : '🔇';
+    } else {
+      b.textContent = mOn ? t('musicOn') : t('musicOff');
+    }
   }
   for (const b of document.querySelectorAll('.sfxBtn')) {
-    b.textContent = sOn ? t('sfxOn') : t('sfxOff');
+    if (b.closest('.lobby-topbar')) {
+      b.textContent = sOn ? '🔊' : '🔈';
+    } else {
+      b.textContent = sOn ? t('sfxOn') : t('sfxOff');
+    }
   }
 }
 
@@ -4148,24 +4395,41 @@ updateAllDOMTranslations();
 updateAudioButtons();
 refreshMenuUI();
 
-if (window.location.hash === '#lobby') {
-  enterLobbyFromSplash();
-} else if (window.location.hash === '#lobby-training') {
-  enterLobbyFromSplash();
-  setGameMode('training');
-} else if (window.location.hash === '#training') {
-  enterLobbyFromSplash();
-  startTrainingMode();
-} else if (window.location.hash === '#admin-arena') {
-  enterAdminMode();
-  enterSpecialAdminTrainingArena();
-} else if (window.location.hash === '#admin-panel') {
-  enterLobbyFromSplash();
-  enterAdminMode();
-  openAdminPanel();
-} else {
-  showScreen('splashScreen');
+function handleRouteHash() {
+  const url = window.location.href;
+  let devRoute = '';
+  try {
+    devRoute = sessionStorage.getItem('cww_route') || localStorage.getItem('cww_route') || '';
+    if (devRoute) {
+      sessionStorage.removeItem('cww_route');
+      localStorage.removeItem('cww_route');
+    }
+  } catch (err) {}
+  const target = (url + ' ' + devRoute).toLowerCase();
+  if (target.includes('admin-arena')) {
+    enterAdminMode();
+    enterSpecialAdminTrainingArena();
+  } else if (target.includes('admin-panel')) {
+    enterLobbyFromSplash();
+    enterAdminMode();
+    openAdminPanel();
+  } else if (target.includes('lobby-training')) {
+    enterLobbyFromSplash();
+    setGameMode('training');
+  } else if (target.includes('training')) {
+    enterLobbyFromSplash();
+    startTrainingMode();
+  } else if (target.includes('combat') || target.includes('play')) {
+    enterLobbyFromSplash();
+    startGame(0);
+  } else if (target.includes('lobby')) {
+    enterLobbyFromSplash();
+  } else {
+    showScreen('splashScreen');
+  }
 }
+window.addEventListener('hashchange', handleRouteHash);
+handleRouteHash();
 
 // ---------- Menu showcase (Fortnite Pedestal Stage) ----------
 const mc = $('menuChicken'), mg = mc.getContext('2d');
