@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>حرب الدجاج المائية 🐔💦</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Lalezar&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=2.2">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- ===== HUD ===== -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="panel hp-panel">
+        <div class="row"><span>❤️ <span id="txtHudHp">الصحة</span></span><b id="hpText">100</b></div>
+        <div class="bar"><div id="hpFill" class="fill hp"></div></div>
+      </div>
+      <div class="panel center-panel">
+        <div id="worldText" class="world-badge">🌾 المزرعة الخضراء</div>
+        <div id="waveText" class="wave">الموجة 1</div>
+        <div id="enemiesText" class="sub">🐔 × 0</div>
+      </div>
+      <div class="panel score-panel">
+        <div>⭐ <b id="scoreText">0</b></div>
+        <div class="hud-coin-box"><span id="coinIcon">🌽</span> <b id="coinText">0</b></div>
+        <button id="btnHudShop" class="btn-hud-shop" title="فتح الدكان للشراء بالذرة">🛒 <span id="txtHudShop">الدكان</span></button>
+      </div>
+    </div>
+    <div id="bossBar" class="hidden">
+      <div id="bossName" class="boss-name">👑 الديك الملك</div>
+      <div class="bar boss"><div id="bossFill" class="fill water"></div></div>
+    </div>
+    <div id="combo" class="hidden"></div>
+    <div id="buffs"></div>
+    <div class="hud-bottom">
+      <div class="panel ammo-panel">
+        <div id="weaponName" class="wname"></div>
+        <div class="bar tank"><div id="ammoFill" class="fill water"></div></div>
+        <div id="ammoText" class="sub"></div>
+      </div>
+      <div id="slots"></div>
+      <div class="panel dash-panel">
+        <div><span id="txtHudDash">💨 اندفاع</span></div>
+        <div class="bar small"><div id="dashFill" class="fill dash"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Dedicated Training Range Overlay (For All Players) ===== -->
+  <div id="trainingHUD" class="training-hud hidden">
+    <!-- Top Bar: DPS Meter & Exit Button -->
+    <div class="training-top-bar">
+      <div class="training-dps-card">
+        <div class="dps-stat"><span id="txtDpsDamageLabel">مجموع الضرر:</span> <b id="trainingTotalDmg">0</b></div>
+        <div class="dps-stat"><span id="txtDpsRateLabel">الضرر/ث (DPS):</span> <b id="trainingDPS">0</b></div>
+        <div class="dps-stat"><span id="txtDpsHitsLabel">الإصابات:</span> <b id="trainingHits">0</b></div>
+        <button id="btnResetDPS" class="btn-training-action small" title="تصفير عداد الضرر">🔄 <span id="txtResetDpsBtn">تصفير العداد</span></button>
+      </div>
+
+      <div class="training-top-actions">
+        <button id="btnExitTraining" class="btn-training-exit" title="الخروج للوبي الرئيسي">
+          🚪 <span id="txtExitTraining">العودة للوبي</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Weapon Bar on Screen (Keys 1-9) -->
+    <div id="trainingWeaponBar" class="training-weapon-bar"></div>
+  </div>
+
+  <!-- ===== Dedicated Special Admin Training Arena Overlay ===== -->
+  <div id="adminArenaHUD" class="admin-arena-hud hidden">
+    <!-- Top Bar: Two Exit Buttons + Arena Badge + Live DPS -->
+    <div class="admin-arena-topbar">
+      <!-- Two Exit Buttons Requested by User -->
+      <div class="admin-arena-nav-btns">
+        <button id="btnExitToAdminBattle" class="btn-arena-nav btn-return-battle" title="العودة لموجات ومعارك طور المشرف العادي">
+          ⚔️ <span id="txtExitToAdminBattle">العودة للأدمن العادي</span>
+        </button>
+        <button id="btnExitArenaToLobby" class="btn-arena-nav btn-return-lobby" title="الخروج إلى القائمة الرئيسية (اللوبي)">
+          🏠 <span id="txtExitArenaToLobby">العودة للوبي</span>
+        </button>
+      </div>
+
+      <!-- Center Badge -->
+      <div class="admin-arena-title-badge">
+        <span class="badge-icon">⭐</span>
+        <span id="txtAdminArenaTitle">ساحة تدريب المشرف الخاصة</span>
+      </div>
+
+      <!-- Live DPS Meter -->
+      <div class="training-dps-card admin-dps-card">
+        <div class="dps-stat"><span class="txtDpsDmgLabel">مجموع الضرر:</span> <b id="arenaTotalDmg">0</b></div>
+        <div class="dps-stat"><span class="txtDpsRateLabel">الضرر/ث (DPS):</span> <b id="arenaDPS">0</b></div>
+        <div class="dps-stat"><span class="txtDpsHitsLabel">الإصابات:</span> <b id="arenaHits">0</b></div>
+        <button id="btnResetArenaDPS" class="btn-training-action small" title="تصفير عداد الضرر">🔄 <span class="txtResetDpsLabel">تصفير</span></button>
+      </div>
+    </div>
+
+    <!-- Bottom Dock: Clean Admin Controls & Weapons (Never overlapping with HUD!) -->
+    <div class="admin-arena-bottom-dock">
+      <div class="admin-arena-controls-row">
+        <button id="admArenaPeaceful" class="btn-arena-ctrl" title="المشي الحر في الماب بمفردك بدون أي دجاج أو دمى">
+          🚶‍♂️ <span id="txtArenaPeaceful">مشي حر بالماب بروحي</span>
+        </button>
+
+        <div class="adm-arena-spawner-group">
+          <select id="admArenaEnemyType" class="adm-arena-select">
+            <option value="chick">كتاكيت سريعة 🐥</option>
+            <option value="basic">دجاج أساسي 🐔</option>
+            <option value="big">دجاج ثقيل ضخم 🦃</option>
+            <option value="sniper">قناص الماي 🎯</option>
+            <option value="bomber">قاذف بالونات 🎈</option>
+          </select>
+          <input type="number" id="admArenaEnemyCount" value="5" min="1" max="50" class="adm-arena-count-input" title="العدد">
+          <button id="admArenaSpawnEnemy" class="btn-arena-ctrl blue" title="إنزال الأعداء بالعدد المحدد">
+            ⚡ <span id="txtArenaSpawn">إنزال دجاج</span>
+          </button>
+        </div>
+
+        <div class="adm-arena-boss-group">
+          <select id="admArenaBossSelect" class="adm-arena-select">
+            <option value="boss_farm">👑 الديك الملك (المزرعة)</option>
+            <option value="boss_desert">🦂 ديك الرمال الفرعوني</option>
+            <option value="boss_ice">🧊 ديك الجليد العملاق</option>
+            <option value="boss_magma">🔥 ديك الحمم الملتهب</option>
+            <option value="boss_space">🛸 إمبراطور الفضاء كوكو</option>
+          </select>
+          <button id="admArenaSpawnBoss" class="btn-arena-ctrl yellow" title="إنزال الملك المختار لمبارزة فردية 1v1">
+            👑 <span id="txtArenaSpawnBoss">إنزال الملك بروحة (1v1)</span>
+          </button>
+        </div>
+
+        <button id="admArenaClearAll" class="btn-arena-ctrl red" title="مسح وتصفير كل الأعداء والدمى في الميدان">
+          💥 <span id="txtArenaClear">تصفير الميدان</span>
+        </button>
+
+        <button id="admArenaToggleAI" class="btn-arena-ctrl ghost" title="تبديل حركة وسلوك دمى التدريب">
+          🤖 <span id="txtArenaAI">الدمى: ثابتة</span>
+        </button>
+      </div>
+
+      <!-- Quick Weapon Bar in Admin Arena -->
+      <div id="adminArenaWeaponBar" class="training-weapon-bar"></div>
+    </div>
+  </div>
+
+  <div id="banner"><div id="bannerTitle"></div><div id="bannerSub"></div></div>
+
+  <!-- ===== Save Toast Notification ===== -->
+  <div id="saveToast" class="save-toast hidden">
+    <span class="save-icon">💾</span>
+    <span id="saveToastText">تم الحفظ تلقائياً!</span>
+  </div>
+
+  <!-- ===== Touch controls ===== -->
+  <div id="touchUI" class="hidden">
+    <button id="tPause" class="tbtn small">⏸</button>
+    <button id="tSwap" class="tbtn">🔄</button>
+    <button id="tReload" class="tbtn">💧</button>
+    <button id="tDash" class="tbtn big">💨</button>
+  </div>
+
+  <!-- ===== Initial Title / Splash Screen (Fortnite Style Cover) ===== -->
+  <div id="splashScreen" class="screen splash-screen">
+    <!-- Action War Background Image -->
+    <div class="splash-bg" style="background-image: url('assets/splash.jpg');"></div>
+    <div class="splash-vignette"></div>
+
+    <!-- Floating Top Side Language Switcher (Globe on the side as requested) -->
+    <div class="splash-topbar">
+      <button id="btnSplashToggleLang" class="splash-globe-btn" title="تغيير اللغة / Change Language">
+        <span class="globe-icon">🌐</span>
+        <span id="splashLangLabel" class="globe-label">English</span>
+      </button>
+    </div>
+
+    <!-- Center Hero Presentation -->
+    <div class="splash-content">
+      <div class="splash-brand">
+        <span class="splash-season-pill" id="txtSplashSeason">SEASON 1 • BATTLE ROYALE</span>
+        <h1 class="splash-logo" id="txtSplashLogo">حرب الدجاج <span>المائية</span> 💦</h1>
+        <p class="splash-tagline" id="txtSplashTagline">المعركة المائية الكبرى في ساحة باتل رويال الأسطورية!</p>
+      </div>
+
+      <!-- Epic Glowing Action Enter Button -->
+      <div class="splash-action-box">
+        <button id="btnEnterLobby" class="btn-splash-enter pulse-glow">
+          <span class="enter-btn-main" id="txtEnterLobby">دخول اللعبة 🎮</span>
+          <small class="enter-btn-sub" id="txtEnterLobbySub">اضغط للدخول إلى اللوبي • PRESS TO ENTER</small>
+        </button>
+      </div>
+
+      <div class="splash-footer-hints">
+        <span class="splash-hint-pill">⚡ Chicken Water War • Battle Royale</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Main Menu: Game Lobby (Fortnite Style) ===== -->
+  <div id="menu" class="screen lobby-screen hidden">
+    <div class="lobby-container">
+      
+      <!-- Top Navigation & Status Bar -->
+      <header class="lobby-topbar">
+        <div class="lobby-brand">
+          <h1 class="lobby-logo" id="txtLobbyLogo" title="العودة لشاشة البداية">حرب الدجاج <span>المائية</span> 💦</h1>
+          <span class="lobby-season-badge">SEASON 1</span>
+        </div>
+
+        <!-- Center Player Currency / Stats Pills -->
+        <div class="lobby-top-stats">
+          <div class="lobby-stat-pill" title="العملات / Coins">
+            <span class="pill-icon">🌽</span>
+            <b id="lobbyCoins">0</b>
+          </div>
+          <div class="lobby-stat-pill" title="أعلى نتيجة / High Score">
+            <span class="pill-icon">🏆</span>
+            <b id="lobbyScore">0</b>
+          </div>
+          <div class="lobby-stat-pill" title="أبعد موجة / Max Wave">
+            <span class="pill-icon">🌊</span>
+            <span id="txtLobbyWavePrefix">الموجة</span> <b id="lobbyWave">1</b>
+          </div>
+        </div>
+
+        <!-- Right / Utility Actions -->
+        <div class="lobby-top-actions">
+          <button id="btnReturnToSplash" class="btn small ghost" title="شاشة البداية والغلاف">
+            <span id="txtReturnSplash">🎬 الغلاف</span>
+          </button>
+          <button id="btnToggleLang" class="btn small lobby-lang-btn" title="تغيير اللغة / Change Language">
+            🌐 English
+          </button>
+          <button class="btn small ghost musicBtn" title="تبديل الموسيقى">🎵</button>
+          <button class="btn small ghost sfxBtn" title="تبديل المؤثرات">🔊</button>
+        </div>
+      </header>
+
+      <!-- Main Stage Area (Center Hero Showcase + Side Sidebar) -->
+      <main class="lobby-main-grid">
+        
+        <!-- SIDEBAR (On the side: Admin Key, Career Stats, Quick Controls) -->
+        <aside class="lobby-sidebar">
+          <!-- Admin Secret Terminal Key (Requested on the side in the lobby) -->
+          <div class="lobby-admin-card">
+            <div class="admin-card-head">
+              <span class="admin-shield">🛡️</span>
+              <div>
+                <b id="txtAdminCardTitle">بوابة المشرف</b>
+                <small id="txtAdminCardSub">Sandbox & VIP</small>
+              </div>
+            </div>
+            <button id="btnOpenAdminModal" class="btn small yellow admin-key-btn" title="دخول لوحة المشرف">
+              🔐 <span id="txtAdminKeyBtn">كود الإدارة</span>
+            </button>
+          </div>
+
+          <!-- Career Stats Card -->
+          <div class="lobby-card career-card">
+            <h4 class="lobby-card-title" id="txtCareerTitle">📊 سجل الإنجازات</h4>
+            <div class="career-stats-grid">
+              <div class="cs-item"><span id="txtBestLabel">🏆 أعلى نتيجة</span><b id="bestText">0</b></div>
+              <div class="cs-item"><span id="txtWaveLabel">🌊 أبعد موجة</span><b id="highestWaveText">1</b></div>
+              <div class="cs-item"><span id="txtKillsLabel">🐔 دجاج مبلول</span><b id="totalKillsText">0</b></div>
+              <div class="cs-item"><span id="txtCoinsLabel">🌽 إجمالي العملات</span><b id="totalCoinsText">0</b></div>
+            </div>
+          </div>
+
+          <!-- Controls Guide -->
+          <div class="lobby-card controls-card">
+            <h4 class="lobby-card-title" id="txtControlsTitle">🎮 التحكم السريع</h4>
+            <div class="controls-pill-grid">
+              <div><kbd>WASD</kbd> <span id="txtCtrlMove">حركة</span></div>
+              <div><kbd>🖱️</kbd> <span id="txtCtrlShoot">رشّ</span></div>
+              <div><kbd>Space</kbd> <span id="txtCtrlDash">اندفاع</span></div>
+              <div><kbd>R</kbd> <span id="txtCtrlReload">تعبئة</span></div>
+              <div><kbd>1-9</kbd> <span id="txtCtrlGuns">أسلحة</span></div>
+            </div>
+          </div>
+
+          <div class="lobby-sidebar-footer">
+            <button id="btnResetData" class="btn small ghost danger" title="مسح الحفظ والبدء من الصفر">
+              🗑️ <span id="txtResetBtn">تصفير الحفظ</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- CENTER STAGE: THE HERO SHOWCASE -->
+        <section class="lobby-hero-stage">
+          <!-- Stage Lighting & Platform Background -->
+          <div class="hero-pedestal-container">
+            <div class="stage-spotlight"></div>
+            
+            <!-- Character Carousel Nav Arrows -->
+            <button id="btnPrevChicken" class="stage-nav-btn prev-btn" title="الشخصية السابقة">◀</button>
+            
+            <!-- Center Canvas on Glowing Stage Platform -->
+            <div class="stage-display">
+              <canvas id="menuChicken" width="460" height="230"></canvas>
+              <div id="chickenLockBadge" class="lock-badge hidden">🔒 مقفول (الموجة 13)</div>
+            </div>
+            
+            <button id="btnNextChicken" class="stage-nav-btn next-btn" title="الشخصية التالية">▶</button>
+          </div>
+
+          <!-- Character Identity Card (Directly Below Stage in Center) -->
+          <div class="hero-identity-card">
+            <div class="hero-title-row">
+              <span id="chickenIcon" class="hero-avatar-icon">🐔</span>
+              <div class="hero-names">
+                <h2 id="chickenName" class="hero-name">رامبو المزرعة</h2>
+                <span id="chickenSub" class="hero-sub">الدجاجة الأصلية</span>
+              </div>
+              <button id="btnSelectChicken" class="btn green hero-equip-btn">مُختار ✔</button>
+            </div>
+
+            <div class="hero-perk-pill">
+              <span class="perk-badge" id="txtPerkLabel">القدرة:</span>
+              <b id="perkName">عزيمة الدجاج</b>
+              <span id="perkDesc" class="perk-desc">+15% قوة الرش وذخيرة إضافية</span>
+            </div>
+
+            <!-- Styles / Outfits Switcher (Directly on the hero stage) -->
+            <div class="hero-styles-row">
+              <span class="style-label" id="txtStyleLabel">المظهر:</span>
+              <div id="chickenStyles" class="style-list"></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Bar: Map & Wave Checkpoints Selector + The Big Play Button -->
+      <footer class="lobby-bottom-bar">
+        <!-- Game Mode Switcher (Battle Royale vs Training Range) -->
+        <div class="lobby-mode-switch-bar">
+          <button id="btnModeBattle" class="mode-tab-btn active">
+            <span class="mode-tab-icon">⚔️</span>
+            <span id="txtModeBattle">باتل رويال (الموجات)</span>
+          </button>
+          <button id="btnModeTraining" class="mode-tab-btn">
+            <span class="mode-tab-icon">🎯</span>
+            <span id="txtModeTraining">ميدان التدريب</span>
+          </button>
+        </div>
+
+        <div class="lobby-bottom-row">
+          <!-- World / Map Checkpoints Selector (Battle Mode) -->
+          <div class="lobby-mode-selector" id="lobbyModeSelector">
+            <div class="mode-sel-label" id="txtWorldSelTitle">🌍 اختر الماب / الموجة:</div>
+            <div id="worldCards" class="world-cards-row"></div>
+          </div>
+
+          <!-- Training Mode Description Card (Shows when Training mode is active) -->
+          <div id="trainingLobbyCard" class="training-lobby-card hidden">
+            <div class="training-card-header">
+              <span class="training-badge">🎯 PRACTICE RANGE</span>
+              <h3 id="txtTrainingCardTitle">ميدان التدريب الحر للأبطال</h3>
+            </div>
+            <p id="txtTrainingCardDesc" class="training-card-p">
+              طور تدريب مستقل: جرب جميع الأسلحة التسعة بحرية تامة • دمى تدريب موزعة في كامل الخريطة لقياس الضرر و DPS • تدريب على المناورة وإطلاق النار!
+            </p>
+            <div class="training-features-pills">
+              <span id="featPill1">🤖 دمى تدريب متحركة وثابتة</span>
+              <span id="featPill2">🔫 أسلحة مفتوحة بالكامل</span>
+              <span id="featPill3">📊 مقياس ضرر فوري (DPS)</span>
+              <span id="featPill4">🗺️ دمى موزعة في كامل الماب</span>
+            </div>
+          </div>
+
+          <!-- Big Fortnite-style Action Button (Ready / Play / Resume) -->
+          <div class="lobby-play-area">
+            <button id="btnResumeRun" class="btn big green lobby-play-btn hidden">
+              <span class="play-main-txt" id="txtResumeBtn">استئناف المعركة ▶️</span>
+              <small id="resumeDetails" class="play-sub-txt">(الموجة 1 • 0 🌽)</small>
+            </button>
+            <button id="btnPlay" class="btn big pulse-play lobby-play-btn">
+              <span class="play-main-txt" id="txtPlayBtn">انطلاق للمعركة ⚔️</span>
+              <small class="play-sub-txt" id="txtPlaySub">READY / اضغط للبدء</small>
+            </button>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ===== Shop ===== -->
+  <div id="shop" class="screen hidden">
+    <div class="card wide">
+      <div class="shop-header">
+        <h2 id="shopTitle" class="h2">🛒 دكان المزرعة</h2>
+        <div class="shop-stats"><span><span id="shopCoinIcon">🌽</span> <b id="shopCoins">0</b> <small id="txtShopCoinsLabel" class="shop-coin-label">(النقود)</small></span><span>❤️ <b id="shopHp">0</b></span></div>
+      </div>
+      <h3 id="txtShopWeapons">🔫 الأسلحة المائية</h3>
+      <div id="shopWeapons" class="grid"></div>
+      <h3 id="txtShopUpgrades">⚡ التطويرات والعتاد</h3>
+      <div id="shopUpgrades" class="grid"></div>
+      <div class="shop-actions">
+        <button id="btnShopResume" class="btn big blue">🎮 العودة لميدان المعركة</button>
+        <button id="btnNext" class="btn big">الموجة التالية ⚔️</button>
+        <button id="btnShopSaveMenu" class="btn ghost">💾 حفظ وخروج للقائمة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Pause ===== -->
+  <div id="pause" class="screen hidden">
+    <div class="card">
+      <h2 id="txtPauseTitle" class="h2">⏸️ استراحة</h2>
+      <p id="txtPauseSub" class="tagline">الدجاج ينتظرك... لا تطوّل 🐔</p>
+      <div class="col full-width">
+        <button id="btnResume" class="btn big">كمّل اللعب ▶️</button>
+        <button id="btnPauseShop" class="btn blue">🛒 دكان الأسلحة والعتاد (الشراء بالذرة)</button>
+        <button id="btnPauseSave" class="btn green">💾 حفظ الجولة والخروج</button>
+        <div class="row-btns">
+          <button class="btn blue musicBtn">🎵 الموسيقى: شغالة</button>
+          <button class="btn blue sfxBtn">🔊 المؤثرات: شغالة</button>
+        </div>
+        <button id="btnPauseMenu" class="btn ghost">القائمة الرئيسية (بدون حفظ)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Game over ===== -->
+  <div id="over" class="screen hidden">
+    <div class="card">
+      <h2 id="txtOverTitle" class="h2 red">انغسلت! 🐔💧</h2>
+      <div id="newBest" class="newbest hidden">🏆 رقم قياسي جديد!</div>
+      <div class="stats">
+        <div><span id="txtOverScoreLabel">النتيجة</span><b id="overScore">0</b></div>
+        <div><span id="txtOverWaveLabel">الموجة</span><b id="overWave">0</b></div>
+        <div><span id="txtOverKillsLabel">دجاج مبلول</span><b id="overKills">0</b></div>
+        <div><span id="txtOverComboLabel">أعلى كومبو</span><b id="overCombo">0</b></div>
+        <div class="full"><span id="txtOverBestLabel">أعلى نتيجة</span><b id="overBest">0</b></div>
+      </div>
+      <div class="col">
+        <button id="btnRetry" class="btn big">العب مرة ثانية 🔁</button>
+        <button id="btnOverMenu" class="btn ghost">القائمة الرئيسية</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Admin Access Login Modal ===== -->
+  <div id="adminModal" class="modal-overlay hidden">
+    <div class="card admin-modal-card">
+      <div class="admin-modal-header">
+        <h2 id="txtAdminModalTitle">🔐 دخول لوحة المشرف</h2>
+        <button id="btnCloseAdminModal" class="btn-close">✕</button>
+      </div>
+      <p id="txtAdminModalSub" class="tagline">أدخل الكود السري للوصول إلى طور التحكم الكامل والـ Sandbox (لا يؤثر على الحفظ)</p>
+      <div class="pass-wrapper">
+        <input type="password" id="adminCodeInput" placeholder="أدخل الكود السري..." autocomplete="off">
+        <button type="button" id="btnToggleCodeVis" class="btn-icon" title="إظهار / إخفاء الكود">👁️</button>
+      </div>
+      <div id="adminErrorMsg" class="admin-err hidden">⚠️ الكود غير صحيح! تأكد من إدخال الكود الصحيح.</div>
+      <div class="row-btns full-width">
+        <button id="btnSubmitAdmin" class="btn green big">دخول لوحة التحكم 🚀</button>
+        <button id="btnCancelAdminModal" class="btn ghost">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Admin Button -->
+  <button id="btnToggleAdminPanel" class="admin-fab hidden" title="فتح لوحة تحكم الأدمن">🛠️ الأدمن</button>
+
+  <!-- ===== Floating Admin Control Panel Drawer ===== -->
+  <div id="adminPanel" class="admin-panel hidden">
+    <div class="admin-head">
+      <div>
+        <h3 id="txtAdminPanelTitle" class="admin-title">🛠️ لوحة تحكم الأدمن <span class="badge-sandbox">Sandbox</span></h3>
+        <small id="txtAdminPanelSub" class="admin-sub">جميع التجارب هنا معزولة تماماً ولا تمس ملف حفظك الأصلي 🔒</small>
+      </div>
+      <button id="btnCloseAdminPanel" class="btn-close">✕</button>
+    </div>
+    <div class="admin-body">
+      <!-- Quick Toggles -->
+      <div class="admin-sec">
+        <h4 id="txtAdmSecRes">⚡ قدرات الخلود والموارد</h4>
+        <div class="admin-grid-2">
+          <button id="admToggleGod" class="btn small adm-toggle">🛡️ الخلود (God Mode): <b id="admGodState">معطل</b></button>
+          <button id="admToggleAmmo" class="btn small adm-toggle">⚡ ذخيرة لا نهائية: <b id="admAmmoState">معطل</b></button>
+          <button id="admAddCoins" class="btn small yellow">💰 +999,999 نقود / ذرة 🌽</button>
+          <button id="admFullHeal" class="btn small green">❤️ شفاء كامل للصحة</button>
+        </div>
+      </div>
+
+      <!-- Shop & Instant Upgrades -->
+      <div class="admin-sec">
+        <h4 id="txtAdmSecShop">🛒 دكان الأسلحة والترقيات (الشراء بالذرة والنقود)</h4>
+        <div class="admin-grid-2">
+          <button id="admOpenShop" class="btn small blue">🛒 فتح الدكان فوراً للشراء</button>
+          <button id="admBuyHeal" class="btn small green">🐛 شراء وجبة دود (علاج كامل)</button>
+          <button id="admUnlockAllWeapons" class="btn small yellow">🔫 فتح وشراء جميع الأسلحة (9/9)</button>
+          <button id="admMaxAllUpgrades" class="btn small purple">⚡ ترقية وشراء جميع الخواص (MAX)</button>
+        </div>
+      </div>
+
+      <!-- Screen Actions -->
+      <div class="admin-sec">
+        <h4 id="txtAdmSecPowers">💣 قوى الساحة</h4>
+        <div class="admin-grid-3">
+          <button id="admNuke" class="btn small red">💣 إبادة الأعداء</button>
+          <button id="admFreezeAll" class="btn small blue">🧊 تجميد الكل</button>
+          <button id="admBurnAll" class="btn small orange">🔥 إشعال الكل</button>
+        </div>
+      </div>
+
+      <!-- Wave & World Warper -->
+      <div class="admin-sec">
+        <h4 id="txtAdmSecWarp">🌍 الانتقال الفوري للمابات والموجات</h4>
+        <div class="warp-row">
+          <select id="admWorldSelect" class="adm-select">
+            <option value="0">🌾 المزرعة (موجة 1 - 12)</option>
+            <option value="1">🏜️ الصحراء (موجة 13 - 24)</option>
+            <option value="2">❄️ الجليد (موجة 25 - 36)</option>
+            <option value="3">🌋 البركان (موجة 37 - 48)</option>
+            <option value="4">🌌 الفضاء (موجة 49+)</option>
+          </select>
+          <div class="wave-stepper">
+            <label id="txtAdmWaveLabel">الموجة:</label>
+            <button id="admWaveDec" class="btn small ghost">-</button>
+            <input type="number" id="admWaveInput" value="1" min="1" max="150">
+            <button id="admWaveInc" class="btn small ghost">+</button>
+          </div>
+          <button id="admBtnWarp" class="btn small green">انتقال فوري ⚡</button>
+        </div>
+      </div>
+
+      <!-- Instant Chicken & Style Swapper -->
+      <div class="admin-sec">
+        <h4 id="txtAdmSecSwap">🐔 تبديل الشخصية والمظهر فوراً</h4>
+        <div class="swap-row">
+          <select id="admChickenSelect" class="adm-select"></select>
+          <select id="admStyleSelect" class="adm-select"></select>
+          <button id="admBtnApplyChar" class="btn small blue">تطبيق الشخصية ✨</button>
+        </div>
+      </div>
+
+      <!-- Fine Stat Tuning -->
+      <div class="admin-sec">
+        <h4 id="txtAdmSecSliders">🎛️ ضبط الخصائص والقدرات (زيادة ونقصان بحرية)</h4>
+        <div class="sliders-list">
+          <div class="slider-item">
+            <div class="slider-label"><span id="txtValAdmSpeedLabel">سرعة الحركة</span><b id="valAdmSpeed">265</b></div>
+            <div class="slider-ctrls">
+              <button class="step-btn" data-stat="speed" data-dir="-1">-</button>
+              <input type="range" id="admSpeed" min="100" max="900" step="10" value="265">
+              <button class="step-btn" data-stat="speed" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="slider-item">
+            <div class="slider-label"><span id="txtValAdmDmgLabel">مضاعف قوة الرش / الضرر</span><b id="valAdmDmg">1.0x</b></div>
+            <div class="slider-ctrls">
+              <button class="step-btn" data-stat="dmg" data-dir="-1">-</button>
+              <input type="range" id="admDmg" min="0.2" max="30" step="0.2" value="1.0">
+              <button class="step-btn" data-stat="dmg" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="slider-item">
+            <div class="slider-label"><span id="txtValAdmMagLabel">سعة الخزان (الذخيرة)</span><b id="valAdmMag">100%</b></div>
+            <div class="slider-ctrls">
+              <button class="step-btn" data-stat="mag" data-dir="-1">-</button>
+              <input type="range" id="admMag" min="20" max="600" step="10" value="100">
+              <button class="step-btn" data-stat="mag" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="slider-item">
+            <div class="slider-label"><span id="txtValAdmRateLabel">سرعة الإطلاق (Fire Rate)</span><b id="valAdmRate">1.0x</b></div>
+            <div class="slider-ctrls">
+              <button class="step-btn" data-stat="rate" data-dir="-1">-</button>
+              <input type="range" id="admRate" min="0.2" max="5" step="0.1" value="1.0">
+              <button class="step-btn" data-stat="rate" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="slider-item">
+            <div class="slider-label"><span id="txtValAdmPelletsLabel">عدد الطلقات (Pellets)</span><b id="valAdmPellets">عادي</b></div>
+            <div class="slider-ctrls">
+              <button class="step-btn" data-stat="pellets" data-dir="-1">-</button>
+              <input type="range" id="admPellets" min="1" max="15" step="1" value="1">
+              <button class="step-btn" data-stat="pellets" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="slider-item">
+            <div class="slider-label"><span id="txtValAdmDashLabel">انتظار الاندفاع (Dash CD)</span><b id="valAdmDash">0.85s</b></div>
+            <div class="slider-ctrls">
+              <button class="step-btn" data-stat="dash" data-dir="-1">-</button>
+              <input type="range" id="admDash" min="0.0" max="1.5" step="0.05" value="0.85">
+              <button class="step-btn" data-stat="dash" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="slider-item">
+            <div class="slider-label"><span id="txtValAdmMagnetLabel">نطاق مغناطيس العملات</span><b id="valAdmMagnet">120px</b></div>
+            <div class="slider-ctrls">
+              <button class="step-btn" data-stat="magnet" data-dir="-1">-</button>
+              <input type="range" id="admMagnet" min="50" max="1200" step="50" value="120">
+              <button class="step-btn" data-stat="magnet" data-dir="1">+</button>
+            </div>
+          </div>
+          <button id="admResetStats" class="btn small ghost">🔄 إعادة ضبط الخصائص للافتراضي</button>
+        </div>
+      </div>
+
+      <!-- Special Dedicated Admin Training Arena Section -->
+      <div class="admin-sec admin-sec-highlight" id="admSecTraining">
+        <h4 id="txtAdmSecTrainingTitle">🎯 ساحة تدريب المشرف الخاصة</h4>
+        <p id="txtAdmSecTrainingDesc" style="font-size: 11px; color: #cbd5e1; margin: 3px 0 8px; line-height: 1.4;">
+          انتقال فوري لمكان تدريب مخصص ومستقل تماماً للمشرف بدون أي دمج أو تداخل في الواجهة، مع إمكانية العودة للأدمن العادي أو اللوبي في أي وقت!
+        </p>
+        <button id="admEnterSpecialArena" class="btn full-width purple glow" style="padding: 10px; font-size: 13px; font-weight: 900;">
+          🚀 <span id="txtAdmEnterArenaBtn">الانتقال إلى ساحة تدريب المشرف الخاصة</span>
+        </button>
+      </div>
+
+      <!-- Exit Sandbox -->
+      <div class="admin-sec">
+        <button id="admExitSandbox" class="btn red full-width">🚪 خروج من طور الأدمن والعودة للقائمة (الحفظ الأصلي آمن)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/audio.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/game.js?v=2.2"></script>
+</body>
+</html>
