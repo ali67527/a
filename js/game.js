@@ -990,25 +990,130 @@ function getChicken(id = selectedChickenId) {
   return CHICKENS.find(c => c.id === id) || CHICKENS[0];
 }
 
+// =====================================================
+//   خزانة السكنات والـ Customizer (خيارات التخصيص الكاملة)
+// =====================================================
+const DEFAULT_CUSTOM_SKINS = {
+  classic: { color: 'white', hat: 'bandana', shoe: 'none', outfit: 'none', shades: true },
+  desert: { color: 'desert_amber', hat: 'turban', shoe: 'none', outfit: 'none', shades: false },
+  frost: { color: 'frost_ice', hat: 'beanie', shoe: 'snow_boots', outfit: 'parka', shades: true },
+  blaze: { color: 'magma_dark', hat: 'horns', shoe: 'magma_boots', outfit: 'magma_armor', shades: false },
+  astro: { color: 'void_purple', hat: 'bubble', shoe: 'gravity_boots', outfit: 'space_suit', shades: false },
+};
+
+const CUSTOM_OPTIONS = {
+  colors: [
+    { id: 'white', name_ar: 'أبيض كلاسيكي', name_en: 'Classic White', body: '#ffffff', wing: '#e2e8f0', comb: '#ef4444' },
+    { id: 'ninja_blue', name_ar: 'أزرق النينجا الليلي', name_en: 'Ninja Midnight Blue', body: '#1e3a8a', wing: '#2563eb', comb: '#38bdf8' },
+    { id: 'stealth_black', name_ar: 'الظل الأسود التكتيكي', name_en: 'Stealth Shadow Black', body: '#0f172a', wing: '#334155', comb: '#dc2626' },
+    { id: 'golden', name_ar: 'الذهب الإمبراطوري الملكي', name_en: 'Imperial Golden', body: '#facc15', wing: '#d97706', comb: '#ea580c' },
+    { id: 'crimson', name_ar: 'أحمر قرمزي ناري', name_en: 'Crimson Fury', body: '#dc2626', wing: '#991b1b', comb: '#fde047' },
+    { id: 'desert_amber', name_ar: 'عنبر الرمال الصحراوية', name_en: 'Desert Amber', body: '#fef3c7', wing: '#f59e0b', comb: '#ea580c' },
+    { id: 'frost_ice', name_ar: 'جليد القطب الأزرق', name_en: 'Glacier Frost Cyan', body: '#e0f2fe', wing: '#7dd3fc', comb: '#0284c7' },
+    { id: 'magma_dark', name_ar: 'صخور الحمم البركانية', name_en: 'Volcanic Magma Basalt', body: '#451a03', wing: '#ea580c', comb: '#fbbf24' },
+    { id: 'void_purple', name_ar: 'بنفسجي الفضاء الكوني', name_en: 'Cosmic Void Purple', body: '#1e1b4b', wing: '#818cf8', comb: '#ec4899' },
+    { id: 'emerald', name_ar: 'أخضر زمردي استوائي', name_en: 'Tropical Emerald', body: '#059669', wing: '#10b981', comb: '#facc15' },
+    { id: 'neon_pink', name_ar: 'وردي سايبر نيون', name_en: 'Cyber Neon Pink', body: '#ec4899', wing: '#f43f5e', comb: '#22d3ee' },
+    { id: 'alien_lime', name_ar: 'أخضر فضائي مشع', name_en: 'Alien Radioactive Lime', body: '#84cc16', wing: '#65a30d', comb: '#a855f7' }
+  ],
+
+  hats: [
+    { id: 'none', icon: '🪶', name_ar: 'طبيعي (بدون قبعة)', name_en: 'Natural (No Hat)', world: -1 },
+    { id: 'ninja', icon: '🥷', name_ar: 'قناع النينجا والربطة', name_en: 'Ninja Mask & Bandana', hatCol: '#ef4444', world: 0 },
+    { id: 'bandana', icon: '🔴', name_ar: 'ربطة الفدائي المقاتل', name_en: 'Commando Bandana', hatCol: '#2563eb', world: 0 },
+    { id: 'cowboy', icon: '🤠', name_ar: 'قبعة الكاوبوي الجلدية', name_en: 'Wild West Cowboy Hat', hatCol: '#78350f', world: 0 },
+    { id: 'crown', icon: '👑', name_ar: 'التاج الملكي المرصع', name_en: 'Royal Jewel Crown', hatCol: '#facc15', gemCol: '#ef4444', world: 0 },
+    { id: 'cap', icon: '🧢', name_ar: 'كاب رياضي أحمر', name_en: 'Sporty Red Cap', hatCol: '#dc2626', world: 0 },
+    { id: 'turban', icon: '👳', name_ar: 'شماغ وعقال الصحراء', name_en: 'Desert Shemagh Turban', hatCol: '#ea580c', gemCol: '#10b981', world: 1 },
+    { id: 'safari', icon: '🧭', name_ar: 'قبعة المستكشف وسفاري', name_en: 'Safari Explorer Hat', hatCol: '#a16207', world: 1 },
+    { id: 'pharaoh', icon: '🦂', name_ar: 'غطاء النمس الفرعوني', name_en: 'Pharaoh Royal Nemes', hatCol: '#facc15', gemCol: '#0284c7', world: 1 },
+    { id: 'beanie', icon: '🧶', name_ar: 'طاقية صوف شتوية', name_en: 'Winter Cozy Beanie', hatCol: '#0ea5e9', world: 2 },
+    { id: 'earmuffs', icon: '🎧', name_ar: 'سماعات تدفئة الأذن', name_en: 'Fluffy Winter Earmuffs', hatCol: '#38bdf8', world: 2 },
+    { id: 'viking', icon: '⚔️', name_ar: 'خوذة فايكنج جليدية', name_en: 'Frost Viking Horns', hatCol: '#94a3b8', world: 2 },
+    { id: 'ice_crown', icon: '🧊', name_ar: 'تاج الصقيع المتجمد', name_en: 'Glacier Ice Crown', hatCol: '#bae6fd', gemCol: '#0284c7', world: 2 },
+    { id: 'parka_hood', icon: '❄️', name_ar: 'قلنسوة الفرو القطبية', name_en: 'Arctic Fur Hood', hatCol: '#0284c7', world: 2 },
+    { id: 'horns', icon: '😈', name_ar: 'قرون الحمم الشيطانية', name_en: 'Molten Demon Horns', hatCol: '#f97316', gemCol: '#ef4444', world: 3 },
+    { id: 'flame', icon: '🔥', name_ar: 'عرف اللهب المتوهج', name_en: 'Living Flame Crest', hatCol: '#f97316', world: 3 },
+    { id: 'biker', icon: '💀', name_ar: 'باندانا الدراج الحارق', name_en: 'Biker Burner Bandana', hatCol: '#dc2626', world: 3 },
+    { id: 'bubble', icon: '🚀', name_ar: 'خوذة الفضاء الزجاجية', name_en: 'Astronaut Glass Bubble', hatCol: '#6366f1', world: 4 },
+    { id: 'visor', icon: '🥽', name_ar: 'نظارة سايبر إلكترونية', name_en: 'Cyberpunk HUD Visor', hatCol: '#a855f7', world: 4 },
+    { id: 'antenna', icon: '🛸', name_ar: 'هوائي فضائي كوني', name_en: 'Cosmic Alien Antenna', hatCol: '#a855f7', world: 4 },
+    { id: 'admiral', icon: '🎖️', name_ar: 'قبعة قائد الأسطول', name_en: 'Space Fleet Admiral', hatCol: '#1e1b4b', gemCol: '#facc15', world: 4 }
+  ],
+
+  shoes: [
+    { id: 'none', icon: '🐾', name_ar: 'مخالب طبيعية (حافي)', name_en: 'Barefoot Talons', world: -1 },
+    { id: 'sneakers', icon: '👟', name_ar: 'جوتي نينجا كحلي رياضي', name_en: 'Ninja Shinobi Sneakers', world: 0 },
+    { id: 'red_kicks', icon: '🔴', name_ar: 'حذاء رياضي أحمر كلاسيكي', name_en: 'Classic Red Kicks', world: 0 },
+    { id: 'cowboy_boots', icon: '👢', name_ar: 'بوت كاوبوي جلدي بمهماز', name_en: 'Cowboy Leather Boots', world: 1 },
+    { id: 'snow_boots', icon: '🥾', name_ar: 'بوت شتوي ببطانة فرو', name_en: 'Arctic Snow Fur Boots', world: 2 },
+    { id: 'magma_boots', icon: '🌋', name_ar: 'بوت صخور الحمم المتوهجة', name_en: 'Molten Magma Boots', world: 3 },
+    { id: 'gravity_boots', icon: '⚡', name_ar: 'أحذية الجاذبية النفاثة نيون', name_en: 'Cyber Gravity Hover Boots', world: 4 }
+  ],
+
+  outfits: [
+    { id: 'none', icon: '🪶', name_ar: 'ريش طبيعي (بدون ملابس)', name_en: 'Natural Feathers', world: -1 },
+    { id: 'ninja_gi', icon: '🥋', name_ar: 'قميص نينجا وحزام أسود', name_en: 'Ninja Gi & Black Obi', world: 0 },
+    { id: 'scarf', icon: '🧣', name_ar: 'وشاح محارب أحمر يرفرف', name_en: 'Warrior Flowing Red Scarf', world: 0 },
+    { id: 'tshirt', icon: '👕', name_ar: 'فانيلة قطرة ماء الرياضية', name_en: 'Hydration Jersey T-Shirt', world: 0 },
+    { id: 'gold_chain', icon: '💎', name_ar: 'سلسلة ذهبية VIP مع ياقوت', name_en: 'Golden Bling Chain', world: 1 },
+    { id: 'parka', icon: '🧥', name_ar: 'كوت شتوي وياقة فرو دافئة', name_en: 'Winter Fur Parka', world: 2 },
+    { id: 'magma_armor', icon: '🛡️', name_ar: 'درع صدري بركاني مقوى', name_en: 'Molten Magma Chestplate', world: 3 },
+    { id: 'space_suit', icon: '🛰️', name_ar: 'بدلة فضاء إلكترونية نيون', name_en: 'Cyber Space Suit', world: 4 }
+  ],
+
+  presets: [
+    { name_ar: '🥷 النينجا الأزرق', name_en: 'Blue Ninja', color: 'ninja_blue', hat: 'ninja', shoe: 'sneakers', outfit: 'ninja_gi' },
+    { name_ar: '🤠 راعي البقر الذهبي', name_en: 'Golden Cowboy', color: 'golden', hat: 'cowboy', shoe: 'cowboy_boots', outfit: 'scarf' },
+    { name_ar: '🦂 فرعون الرمال الأسطوري', name_en: 'Desert Pharaoh', color: 'desert_amber', hat: 'pharaoh', shoe: 'none', outfit: 'gold_chain' },
+    { name_ar: '❄️ شبح القطب المتجمد', name_en: 'Frost Spectre', color: 'frost_ice', hat: 'ice_crown', shoe: 'snow_boots', outfit: 'parka' },
+    { name_ar: '🔥 مدمر الحمم البركاني', name_en: 'Magma Destroyer', color: 'magma_dark', hat: 'horns', shoe: 'magma_boots', outfit: 'magma_armor' },
+    { name_ar: '🚀 رائد الفضاء النيون', name_en: 'Neon Astronaut', color: 'void_purple', hat: 'bubble', shoe: 'gravity_boots', outfit: 'space_suit' },
+    { name_ar: '🕶️ عميل سري تكتيكي', name_en: 'Stealth Agent', color: 'stealth_black', hat: 'bandana', shoe: 'sneakers', outfit: 'ninja_gi' }
+  ]
+};
+
 let selectedChickenId = 'classic';
 let selectedStyles = { classic: 0, desert: 0, frost: 0, blaze: 0, astro: 0 };
 let currentWorldIndex = 0;
 let selectedStartingWorld = 0;
 
-function getChickenVisual(chId = selectedChickenId, styleIndex = null) {
+function getChickenVisual(chId = selectedChickenId, customOverride = null) {
   const ch = getChicken(chId);
-  const sIdx = styleIndex != null ? styleIndex : (selectedStyles[chId] || 0);
-  const style = (ch.styles && ch.styles[sIdx]) || (ch.styles && ch.styles[0]) || {};
+  const customSkins = (Storage.profile && Storage.profile.customSkins) || {};
+  let saved = customSkins[chId];
+  if (!saved) {
+    try {
+      const ls = localStorage.getItem('cww_custom_skins_v1');
+      if (ls) {
+        const parsed = JSON.parse(ls);
+        if (parsed && parsed[chId]) saved = parsed[chId];
+      }
+    } catch (e) {}
+  }
+  if (!saved) {
+    saved = DEFAULT_CUSTOM_SKINS[chId] || DEFAULT_CUSTOM_SKINS.classic;
+  }
+  const cfg = (customOverride && typeof customOverride === 'object') ? customOverride : saved;
+
+  const pal = CUSTOM_OPTIONS.colors.find(c => c.id === cfg.color) || CUSTOM_OPTIONS.colors[0];
+  const hatItem = CUSTOM_OPTIONS.hats.find(h => h.id === cfg.hat);
+  const hatId = (hatItem && hatItem.id !== 'none') ? hatItem.id : (cfg.hat && cfg.hat !== 'none' ? cfg.hat : null);
+  const hatCol = cfg.hatCol || (hatItem && hatItem.hatCol) || null;
+  const gemCol = cfg.gemCol || (hatItem && hatItem.gemCol) || null;
+
   return {
     ch,
-    style,
-    body: style.body || '#ffffff',
-    wing: style.wing || '#e2e8f0',
-    comb: style.comb || '#ef4444',
-    hat: style.hat || null,
-    hatCol: style.hatCol || null,
-    gemCol: style.gemCol || null,
-    shades: !!style.shades
+    colorId: cfg.color || 'white',
+    body: cfg.body || pal.body,
+    wing: cfg.wing || pal.wing,
+    comb: cfg.comb || pal.comb,
+    hat: hatId,
+    hatCol: hatCol,
+    gemCol: gemCol,
+    shoe: cfg.shoe || 'none',
+    outfit: cfg.outfit || 'none',
+    shades: cfg.shades != null ? !!cfg.shades : (chId === 'classic' || chId === 'frost')
   };
 }
 
@@ -1177,7 +1282,8 @@ const Storage = (() => {
     selectedChicken: 'classic',
     unlockedWorlds: [0],
     highestWorld: 0,
-    selectedStyles: { classic: 0, desert: 0, frost: 0, blaze: 0, astro: 0 }
+    selectedStyles: { classic: 0, desert: 0, frost: 0, blaze: 0, astro: 0 },
+    customSkins: JSON.parse(JSON.stringify(DEFAULT_CUSTOM_SKINS))
   });
 
   let profile = defaultProfile();
@@ -1195,6 +1301,24 @@ const Storage = (() => {
       if (!Array.isArray(profile.unlockedWorlds)) profile.unlockedWorlds = [0];
       if (!profile.selectedStyles || typeof profile.selectedStyles !== 'object') {
         profile.selectedStyles = { classic: 0, desert: 0, frost: 0, blaze: 0, astro: 0 };
+      }
+
+      // Load custom skins with independent fallback
+      if (!profile.customSkins || typeof profile.customSkins !== 'object') {
+        profile.customSkins = JSON.parse(JSON.stringify(DEFAULT_CUSTOM_SKINS));
+      }
+      try {
+        const savedCustom = localStorage.getItem('cww_custom_skins_v1');
+        if (savedCustom) {
+          const parsedCustom = JSON.parse(savedCustom);
+          profile.customSkins = Object.assign(profile.customSkins, parsedCustom);
+        }
+      } catch (e) {}
+
+      for (const k of Object.keys(DEFAULT_CUSTOM_SKINS)) {
+        if (!profile.customSkins[k]) {
+          profile.customSkins[k] = Object.assign({}, DEFAULT_CUSTOM_SKINS[k]);
+        }
       }
 
       // Check unlocks based on 12 waves per world (13: desert, 25: frost, 37: blaze, 49: astro)
@@ -1215,7 +1339,9 @@ const Storage = (() => {
         if (!profile.unlockedWorlds.includes(4)) profile.unlockedWorlds.push(4);
       }
 
-      if (!profile.selectedChicken) profile.selectedChicken = 'classic';
+      if (!profile.selectedChicken || (!isAdminMode && !profile.unlockedChickens.includes(profile.selectedChicken))) {
+        profile.selectedChicken = 'classic';
+      }
       selectedChickenId = profile.selectedChicken;
       selectedStyles = Object.assign({ classic: 0, desert: 0, frost: 0, blaze: 0, astro: 0 }, profile.selectedStyles);
     } catch (e) {
@@ -1537,6 +1663,14 @@ function screenToWorld(sx, sy) {
 
 // ---------- Player helpers ----------
 function newPlayer(chId = selectedChickenId) {
+  // STRICT PROGRESSION LOCK: Player cannot use locked chicken or abilities in standard mode
+  if (!isAdminMode) {
+    const unlocked = (Storage.profile && Storage.profile.unlockedChickens) || ['classic'];
+    if (!unlocked.includes(chId) || !chId) {
+      chId = 'classic';
+      selectedChickenId = 'classic';
+    }
+  }
   const ch = getChicken(chId);
   const hpBase = ch.id === 'classic' ? 120 : 100;
   const p = {
@@ -2832,7 +2966,7 @@ function render() {
 function drawPlayer() {
   const p = player;
   const ch = getChicken(p.chicken);
-  const vis = getChickenVisual(p.chicken, p.styleIndex);
+  const vis = getChickenVisual(p.chicken);
   if (!p.dead) {
     ctx.strokeStyle = ch.id === 'desert' ? 'rgba(245,158,11,0.9)' : ch.id === 'frost' ? 'rgba(186,230,253,0.9)' : ch.id === 'blaze' ? 'rgba(249,115,22,0.9)' : ch.id === 'astro' ? 'rgba(168,85,247,0.9)' : 'rgba(56,189,248,0.8)';
     ctx.lineWidth = 3;
@@ -2842,12 +2976,13 @@ function drawPlayer() {
   if (p.dashT > 0) {
     for (let i = 1; i <= 3; i++) {
       drawChicken(ctx, { x: p.x - p.dashX * i * 18, y: p.y - p.dashY * i * 18, r: p.r, aim: p.aim, t: p.t, moving: true,
-        body: vis.body, wing: vis.wing, comb: vis.comb, alpha: 0.35 / i });
+        body: vis.body, wing: vis.wing, comb: vis.comb, shoe: vis.shoe, outfit: vis.outfit, worldIdx: ch.worldId, alpha: 0.35 / i });
     }
   }
   drawChicken(ctx, { x: p.x, y: p.y, r: p.r, aim: p.aim, t: p.t, moving: p.moving,
     body: vis.body, wing: vis.wing, comb: vis.comb, gun: curW().id,
-    hat: vis.hat, hatCol: vis.hatCol, gemCol: vis.gemCol, shades: vis.shades,
+    hat: vis.hat, hatCol: vis.hatCol, gemCol: vis.gemCol, shoe: vis.shoe, outfit: vis.outfit, shades: vis.shades,
+    worldIdx: ch.worldId,
     flash: p.flash > 0, alpha: blink ? 0.45 : 1, recoil: p.recoil, ko: p.dead, wet: p.dead ? 1 : 0,
     wetCol: ch.id === 'desert' ? '#f59e0b' : ch.id === 'frost' ? '#bae6fd' : ch.id === 'blaze' ? '#ea580c' : ch.id === 'astro' ? '#c084fc' : '#38bdf8',
     empty: p.ammo[curW().id] <= 0 });
@@ -3253,11 +3388,11 @@ function spawnMapWideTrainingDummies() {
   }
 }
 
-function startTrainingMode() {
+function startTrainingMode(startWorldIdx = null) {
   isTrainingMode = true;
   isAdminTrainingArena = false;
   if (!isAdminMode) Storage.clearActiveRun();
-  currentWorldIndex = 0;
+  currentWorldIndex = startWorldIdx != null ? startWorldIdx : (selectedStartingWorld || 0);
   bgCanvas = buildBackground(WORLD.w, WORLD.h, currentWorldIndex);
   Sfx.init();
   Sfx.setTheme(currentWorldIndex);
@@ -3287,6 +3422,7 @@ function startTrainingMode() {
 
   // Show Training Range Overlay only (clean, no admin bar collision)
   $('trainingHUD').classList.remove('hidden');
+  if ($('btnExitTrainingAdmin')) $('btnExitTrainingAdmin').classList.toggle('hidden', !isAdminMode);
   $('adminArenaHUD').classList.add('hidden');
   
   state = 'playing';
@@ -3533,6 +3669,9 @@ function startGame(startWorldIdx = null) {
   for (const k in hudCache) delete hudCache[k];
   cam.x = player.x; cam.y = player.y;
   state = 'playing'; showScreen(null);
+  if (isAdminMode) {
+    $('btnToggleAdminPanel').classList.remove('hidden');
+  }
   startWave();
 }
 
@@ -3565,8 +3704,10 @@ function resumeSavedRun() {
   Sfx.init();
   Sfx.setTheme(currentWorldIndex);
   Sfx.startMusic();
-  player = newPlayer();
-  player.chicken = run.chicken || selectedChickenId;
+  const candidateChicken = run.chicken || selectedChickenId;
+  const safeChicken = (!isAdminMode && !Storage.profile.unlockedChickens.includes(candidateChicken)) ? 'classic' : candidateChicken;
+  player = newPlayer(safeChicken);
+  player.chicken = safeChicken;
   player.hp = run.hp;
   player.maxHp = run.maxHp;
   player.wi = run.wi;
@@ -3603,6 +3744,7 @@ function pauseGame() {
   if (state !== 'playing') return;
   state = 'paused'; mouse.down = false;
   autoSaveRun(false);
+  if ($('btnPauseAdminLobby')) $('btnPauseAdminLobby').classList.toggle('hidden', !isAdminMode);
   showScreen('pause');
 }
 
@@ -3615,11 +3757,27 @@ function resumeGame() {
 function goMenu() {
   state = 'menu'; player = null; enemies = []; bullets = []; lobs = []; pickups = []; boss = null;
   isTrainingMode = false;
+  isAdminTrainingArena = false;
   const thud = $('trainingHUD'); if (thud) thud.classList.add('hidden');
   const tadm = $('trainingAdminBar'); if (tadm) tadm.classList.add('hidden');
+  const ahud = $('adminArenaHUD'); if (ahud) ahud.classList.add('hidden');
   currentWorldIndex = 0;
   bgCanvas = buildBackground(WORLD.w, WORLD.h, 0);
   Sfx.setTheme(0);
+
+  if (isAdminMode) {
+    if ($('menu')) $('menu').classList.add('is-admin-lobby');
+    if ($('adminLobbyBanner')) $('adminLobbyBanner').classList.remove('hidden');
+    if ($('adminPlayCluster')) $('adminPlayCluster').classList.remove('hidden');
+    if ($('btnPlay')) $('btnPlay').classList.add('hidden');
+    if ($('btnResumeRun')) $('btnResumeRun').classList.add('hidden');
+  } else {
+    if ($('menu')) $('menu').classList.remove('is-admin-lobby');
+    if ($('adminLobbyBanner')) $('adminLobbyBanner').classList.add('hidden');
+    if ($('adminPlayCluster')) $('adminPlayCluster').classList.add('hidden');
+    if ($('btnPlay')) $('btnPlay').classList.remove('hidden');
+  }
+
   refreshMenuUI();
   showScreen('menu');
 }
@@ -3629,7 +3787,7 @@ let previewChickenIndex = 0;
 
 function updateChickenCarouselUI() {
   const ch = CHICKENS[previewChickenIndex] || CHICKENS[0];
-  const unlocked = Storage.profile.unlockedChickens.includes(ch.id);
+  const unlocked = isAdminMode || Storage.profile.unlockedChickens.includes(ch.id);
   const isSelected = selectedChickenId === ch.id;
 
   $('chickenIcon').textContent = ch.icon;
@@ -3656,31 +3814,43 @@ function updateChickenCarouselUI() {
     btnSelect.className = 'btn blue hero-equip-btn';
     btnSelect.disabled = false;
   } else {
-    btnSelect.textContent = t('locked');
-    btnSelect.className = 'btn ghost hero-equip-btn';
+    btnSelect.textContent = t('lockedWave', ch.unlockWave);
+    btnSelect.className = 'btn ghost hero-equip-btn locked';
     btnSelect.disabled = true;
   }
 
-  // Populate styles
-  const styleBox = $('chickenStyles');
-  if (styleBox) {
-    styleBox.innerHTML = '';
-    const styles = ch.styles || [];
-    const activeStyleIdx = selectedStyles[ch.id] || 0;
-    styles.forEach((st, idx) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'style-btn' + (idx === activeStyleIdx ? ' active' : '');
-      btn.innerHTML = `<span class="st-color" style="background:${st.body}; border:2px solid ${st.wing}"></span><span class="st-name">${st.name}</span>`;
-      btn.onclick = () => {
-        selectedStyles[ch.id] = idx;
-        Storage.profile.selectedStyles = selectedStyles;
-        Storage.saveProfile();
-        updateChickenCarouselUI();
-        Sfx.swap();
+  // Update Customizer summary pills on the hero identity card
+  const vis = getChickenVisual(ch.id);
+  const colItem = CUSTOM_OPTIONS.colors.find(c => c.id === vis.colorId) || CUSTOM_OPTIONS.colors[0];
+  const hatItem = CUSTOM_OPTIONS.hats.find(h => h.id === (vis.hat || 'none')) || CUSTOM_OPTIONS.hats[0];
+  const shoeItem = CUSTOM_OPTIONS.shoes.find(s => s.id === (vis.shoe || 'none')) || CUSTOM_OPTIONS.shoes[0];
+  const outfitItem = CUSTOM_OPTIONS.outfits.find(o => o.id === (vis.outfit || 'none')) || CUSTOM_OPTIONS.outfits[0];
+
+  if ($('pillSkinColor')) $('pillSkinColor').textContent = `🎨 ${currentLang === 'en' ? colItem.name_en : colItem.name_ar}`;
+  if ($('pillSkinHat')) $('pillSkinHat').textContent = `${hatItem.icon || '🎩'} ${currentLang === 'en' ? hatItem.name_en : hatItem.name_ar}`;
+  if ($('pillSkinShoe')) $('pillSkinShoe').textContent = `${shoeItem.icon || '👟'} ${currentLang === 'en' ? shoeItem.name_en : shoeItem.name_ar}`;
+  if ($('pillSkinOutfit')) $('pillSkinOutfit').textContent = `${outfitItem.icon || '🎽'} ${currentLang === 'en' ? outfitItem.name_en : outfitItem.name_ar}`;
+
+  const btnLocker = $('btnOpenLocker');
+  if (btnLocker) {
+    if (!unlocked) {
+      btnLocker.classList.add('locked');
+      btnLocker.disabled = true;
+      btnLocker.title = currentLang === 'en' ? `Locked until Wave ${ch.unlockWave}` : `سكن مقفل حتى الوصول للموجة ${ch.unlockWave}`;
+      const txtOpenLocker = $('txtOpenLocker');
+      if (txtOpenLocker) txtOpenLocker.textContent = currentLang === 'en' ? `Locked Hero (Wave ${ch.unlockWave}) 🔒` : `سكن مقفل (يفتح في موجة ${ch.unlockWave}) 🔒`;
+      btnLocker.onclick = () => {
+        Sfx.empty();
+        showSaveToast(currentLang === 'en' ? `🔒 Locked until Wave ${ch.unlockWave}` : `🔒 سكن مقفل حتى الوصول للموجة ${ch.unlockWave}`);
       };
-      styleBox.appendChild(btn);
-    });
+    } else {
+      btnLocker.classList.remove('locked');
+      btnLocker.disabled = false;
+      btnLocker.title = currentLang === 'en' ? 'Open Locker & Customize' : 'تعديل وتصميم الدجاجة (خزانة السكنات)';
+      const txtOpenLocker = $('txtOpenLocker');
+      if (txtOpenLocker) txtOpenLocker.textContent = currentLang === 'en' ? 'Customize Chicken (Locker 🎨)' : 'تعديل وتصميم الدجاجة (خزانة السكنات 🎨)';
+      btnLocker.onclick = () => openLockerModal(ch.id);
+    }
   }
 }
 
@@ -3692,18 +3862,21 @@ function renderWorldCards() {
   const unlocked = prof.unlockedWorlds || [0];
   
   WORLDS.forEach(w => {
-    const isUnlocked = unlocked.includes(w.id);
+    const isUnlocked = isAdminMode || unlocked.includes(w.id);
     const isActive = selectedStartingWorld === w.id;
     const card = document.createElement('div');
     card.className = 'world-card' + (isActive ? ' active' : '') + (isUnlocked ? '' : ' locked');
     const startW = w.id * WAVES_PER_WORLD + 1;
     const endW = (w.id + 1) * WAVES_PER_WORLD;
     const waveRange = w.id === 4 ? t('wavesRangePlus', startW) : t('wavesRange', startW, endW);
+    const badgeMarkup = isUnlocked
+      ? (isActive ? `<span class="wc-badge">${t('startPoint')}</span>` : `<span class="wc-badge select">${isAdminMode ? 'اختيار الماب ⭐' : t('selectWorld')}</span>`)
+      : `<span class="wc-badge lock">${t('locked')}</span>`;
     card.innerHTML = `
       <div class="wc-icon">${w.icon}</div>
       <div class="wc-name">${w.name}</div>
       <div class="wc-waves">${waveRange}</div>
-      ${isUnlocked ? (isActive ? `<span class="wc-badge">${t('startPoint')}</span>` : `<span class="wc-badge select">${t('selectWorld')}</span>`) : `<span class="wc-badge lock">${t('locked')}</span>`}
+      ${badgeMarkup}
     `;
     if (isUnlocked) {
       card.onclick = () => {
@@ -3716,6 +3889,450 @@ function renderWorldCards() {
     container.appendChild(card);
   });
 }
+
+// =====================================================
+//   HERO LOCKER & SKIN CUSTOMIZER CONTROLLER
+// =====================================================
+let lockerChickenId = 'classic';
+let lockerDraftConfig = null;
+let lockerActiveTab = 'color';
+let lockerAnimId = null;
+
+function getCustomSkinConfig(chId) {
+  if (Storage.profile && Storage.profile.customSkins && Storage.profile.customSkins[chId]) {
+    return Object.assign({}, Storage.profile.customSkins[chId]);
+  }
+  return Object.assign({}, DEFAULT_CUSTOM_SKINS[chId] || DEFAULT_CUSTOM_SKINS.classic);
+}
+
+function openLockerModal(chId) {
+  const targetId = chId || selectedChickenId;
+  const isUnlocked = isAdminMode || Storage.profile.unlockedChickens.includes(targetId);
+  if (!isUnlocked) {
+    const ch = getChicken(targetId);
+    showSaveToast(currentLang === 'en' ? `🔒 ${ch.name} is locked until wave ${ch.unlockWave}!` : `🔒 سكن ${ch.name} مقفل حتى تصل للموجة ${ch.unlockWave}!`);
+    Sfx.empty();
+    return;
+  }
+  lockerChickenId = targetId;
+  lockerDraftConfig = getCustomSkinConfig(lockerChickenId);
+  lockerActiveTab = 'color';
+
+  const modal = $('lockerModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  updateLockerCharHeader();
+  populateLockerPresets();
+  switchLockerTab('color');
+  startLockerAnimation();
+  Sfx.swap();
+}
+
+function closeLockerModal() {
+  if (lockerAnimId) {
+    cancelAnimationFrame(lockerAnimId);
+    lockerAnimId = null;
+  }
+  const modal = $('lockerModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function updateLockerCharHeader() {
+  const ch = getChicken(lockerChickenId);
+  if ($('lockerCharName')) {
+    $('lockerCharName').textContent = `${ch.icon} ${ch.name}`;
+  }
+}
+
+function switchLockerTab(tabName) {
+  lockerActiveTab = tabName;
+  const tabs = ['color', 'hat', 'shoe', 'outfit'];
+  tabs.forEach(t => {
+    const btn = $(`tabLocker${t.charAt(0).toUpperCase() + t.slice(1)}`);
+    const view = $(`locker${t.charAt(0).toUpperCase() + t.slice(1)}sView`);
+    if (btn) btn.classList.toggle('active', t === tabName);
+    if (view) {
+      view.classList.toggle('active', t === tabName);
+      view.classList.toggle('hidden', t !== tabName);
+    }
+  });
+
+  if (tabName === 'color') renderLockerColors();
+  else if (tabName === 'hat') renderLockerHats();
+  else if (tabName === 'shoe') renderLockerShoes();
+  else if (tabName === 'outfit') renderLockerOutfits();
+}
+
+function renderLockerColors() {
+  const grid = $('lockerColorsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  CUSTOM_OPTIONS.colors.forEach(col => {
+    const card = document.createElement('div');
+    const isAct = lockerDraftConfig.color === col.id;
+    card.className = 'color-card' + (isAct ? ' active' : '');
+    card.innerHTML = `
+      <div class="color-swatch-circle" style="background: linear-gradient(135deg, ${col.body} 50%, ${col.wing} 50%); border-color: ${col.comb};"></div>
+      <div class="color-card-name">${currentLang === 'en' ? col.name_en : col.name_ar}</div>
+      ${isAct ? '<span class="item-active-check">✔</span>' : ''}
+    `;
+    card.onclick = () => {
+      lockerDraftConfig.color = col.id;
+      delete lockerDraftConfig.body;
+      delete lockerDraftConfig.wing;
+      delete lockerDraftConfig.comb;
+      renderLockerColors();
+      Sfx.swap();
+    };
+    grid.appendChild(card);
+  });
+}
+
+function renderLockerHats() {
+  const grid = $('lockerHatsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const ch = getChicken(lockerChickenId);
+  const prof = Storage.profile;
+  const unlockedWorlds = prof.unlockedWorlds || [0];
+
+  CUSTOM_OPTIONS.hats.forEach(h => {
+    const card = document.createElement('div');
+    const isAct = (lockerDraftConfig.hat || 'none') === h.id;
+    const isMatch = h.world === ch.worldId;
+    const isUnlocked = isAdminMode || h.world <= 0 || unlockedWorlds.includes(h.world);
+
+    card.className = 'item-card' + (isAct ? ' active' : '') + (isUnlocked ? '' : ' locked');
+    const badgeMarkup = !isUnlocked
+      ? `<span class="item-lock-badge">🔒 ${WORLDS[h.world].name}</span>`
+      : (isMatch ? `<span class="item-theme-badge">⭐ ${currentLang === 'en' ? 'Map Theme' : 'ملائم للماب'}</span>` : '');
+
+    card.innerHTML = `
+      <div class="item-card-icon">${h.icon || '🎩'}</div>
+      <div class="item-card-name">${currentLang === 'en' ? h.name_en : h.name_ar}</div>
+      ${badgeMarkup}
+      ${isAct ? '<span class="item-active-check">✔</span>' : ''}
+    `;
+    card.onclick = () => {
+      if (!isUnlocked) {
+        showSaveToast(currentLang === 'en' ? `🔒 Unlocks in ${WORLDS[h.world].name} (Wave ${h.world * 12 + 1})` : `🔒 يُفتح عند الوصول لماب ${WORLDS[h.world].name} (موجة ${h.world * 12 + 1})`);
+        Sfx.empty();
+        return;
+      }
+      lockerDraftConfig.hat = h.id;
+      if (h.hatCol) lockerDraftConfig.hatCol = h.hatCol;
+      else delete lockerDraftConfig.hatCol;
+      if (h.gemCol) lockerDraftConfig.gemCol = h.gemCol;
+      else delete lockerDraftConfig.gemCol;
+      renderLockerHats();
+      Sfx.swap();
+    };
+    grid.appendChild(card);
+  });
+}
+
+function renderLockerShoes() {
+  const grid = $('lockerShoesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const ch = getChicken(lockerChickenId);
+  const prof = Storage.profile;
+  const unlockedWorlds = prof.unlockedWorlds || [0];
+
+  CUSTOM_OPTIONS.shoes.forEach(s => {
+    const card = document.createElement('div');
+    const isAct = (lockerDraftConfig.shoe || 'none') === s.id;
+    const isMatch = s.world === ch.worldId;
+    const isUnlocked = isAdminMode || s.world <= 0 || unlockedWorlds.includes(s.world);
+
+    card.className = 'item-card' + (isAct ? ' active' : '') + (isUnlocked ? '' : ' locked');
+    const badgeMarkup = !isUnlocked
+      ? `<span class="item-lock-badge">🔒 ${WORLDS[s.world].name}</span>`
+      : (isMatch ? `<span class="item-theme-badge">⭐ ${currentLang === 'en' ? 'Map Theme' : 'ملائم للماب'}</span>` : '');
+
+    card.innerHTML = `
+      <div class="item-card-icon">${s.icon || '👟'}</div>
+      <div class="item-card-name">${currentLang === 'en' ? s.name_en : s.name_ar}</div>
+      ${badgeMarkup}
+      ${isAct ? '<span class="item-active-check">✔</span>' : ''}
+    `;
+    card.onclick = () => {
+      if (!isUnlocked) {
+        showSaveToast(currentLang === 'en' ? `🔒 Unlocks in ${WORLDS[s.world].name} (Wave ${s.world * 12 + 1})` : `🔒 يُفتح عند الوصول لماب ${WORLDS[s.world].name} (موجة ${s.world * 12 + 1})`);
+        Sfx.empty();
+        return;
+      }
+      lockerDraftConfig.shoe = s.id;
+      renderLockerShoes();
+      Sfx.swap();
+    };
+    grid.appendChild(card);
+  });
+}
+
+function renderLockerOutfits() {
+  const grid = $('lockerOutfitsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const ch = getChicken(lockerChickenId);
+  const prof = Storage.profile;
+  const unlockedWorlds = prof.unlockedWorlds || [0];
+
+  CUSTOM_OPTIONS.outfits.forEach(o => {
+    const card = document.createElement('div');
+    const isAct = (lockerDraftConfig.outfit || 'none') === o.id;
+    const isMatch = o.world === ch.worldId;
+    const isUnlocked = isAdminMode || o.world <= 0 || unlockedWorlds.includes(o.world);
+
+    card.className = 'item-card' + (isAct ? ' active' : '') + (isUnlocked ? '' : ' locked');
+    const badgeMarkup = !isUnlocked
+      ? `<span class="item-lock-badge">🔒 ${WORLDS[o.world].name}</span>`
+      : (isMatch ? `<span class="item-theme-badge">⭐ ${currentLang === 'en' ? 'Map Theme' : 'ملائم للماب'}</span>` : '');
+
+    card.innerHTML = `
+      <div class="item-card-icon">${o.icon || '🎽'}</div>
+      <div class="item-card-name">${currentLang === 'en' ? o.name_en : o.name_ar}</div>
+      ${badgeMarkup}
+      ${isAct ? '<span class="item-active-check">✔</span>' : ''}
+    `;
+    card.onclick = () => {
+      if (!isUnlocked) {
+        showSaveToast(currentLang === 'en' ? `🔒 Unlocks in ${WORLDS[o.world].name} (Wave ${o.world * 12 + 1})` : `🔒 يُفتح عند الوصول لماب ${WORLDS[o.world].name} (موجة ${o.world * 12 + 1})`);
+        Sfx.empty();
+        return;
+      }
+      lockerDraftConfig.outfit = o.id;
+      renderLockerOutfits();
+      Sfx.swap();
+    };
+    grid.appendChild(card);
+  });
+}
+
+function populateLockerPresets() {
+  const row = $('lockerPresetsRow');
+  if (!row) return;
+  row.innerHTML = '';
+  const prof = Storage.profile;
+  const unlockedWorlds = prof.unlockedWorlds || [0];
+
+  CUSTOM_OPTIONS.presets.forEach(p => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    const hatItem = CUSTOM_OPTIONS.hats.find(h => h.id === p.hat);
+    const shoeItem = CUSTOM_OPTIONS.shoes.find(s => s.id === p.shoe);
+    const outfitItem = CUSTOM_OPTIONS.outfits.find(o => o.id === p.outfit);
+    const reqWorld = Math.max(
+      hatItem && hatItem.world != null ? hatItem.world : 0,
+      shoeItem && shoeItem.world != null ? shoeItem.world : 0,
+      outfitItem && outfitItem.world != null ? outfitItem.world : 0
+    );
+    const isUnlocked = isAdminMode || reqWorld <= 0 || unlockedWorlds.includes(reqWorld);
+
+    btn.className = 'preset-chip' + (isUnlocked ? '' : ' locked');
+    btn.textContent = (isUnlocked ? '' : '🔒 ') + (currentLang === 'en' ? p.name_en : p.name_ar);
+    btn.onclick = () => {
+      if (!isUnlocked) {
+        showSaveToast(currentLang === 'en' ? `🔒 Unlocks in ${WORLDS[reqWorld].name} (Wave ${reqWorld * 12 + 1})` : `🔒 يتطلب الوصول لماب ${WORLDS[reqWorld].name} (موجة ${reqWorld * 12 + 1})`);
+        Sfx.empty();
+        return;
+      }
+      lockerDraftConfig.color = p.color;
+      delete lockerDraftConfig.body;
+      delete lockerDraftConfig.wing;
+      delete lockerDraftConfig.comb;
+      lockerDraftConfig.hat = p.hat;
+      lockerDraftConfig.shoe = p.shoe;
+      lockerDraftConfig.outfit = p.outfit;
+      const hItem = CUSTOM_OPTIONS.hats.find(h => h.id === p.hat);
+      if (hItem && hItem.hatCol) lockerDraftConfig.hatCol = hItem.hatCol;
+      else delete lockerDraftConfig.hatCol;
+      if (hItem && hItem.gemCol) lockerDraftConfig.gemCol = hItem.gemCol;
+      else delete lockerDraftConfig.gemCol;
+      switchLockerTab(lockerActiveTab);
+      Sfx.swap();
+      showSaveToast(`${p.name_ar} 🎨`);
+    };
+    row.appendChild(btn);
+  });
+}
+
+function startLockerAnimation() {
+  const cv = $('lockerCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+
+  function renderLockerFrame(now) {
+    if (!$('lockerModal') || $('lockerModal').classList.contains('hidden')) return;
+    const t = now / 1000;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+
+    // Glowing Pedestal Platform
+    const cx = cv.width / 2, cy = cv.height * 0.74;
+    ctx.save();
+    // Shadow under pedestal
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 32, 110, 32, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pedestal Base Cylinders
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 18, 95, 26, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+
+    // Top Platform Disk with Neon Glow
+    const glowGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 90);
+    glowGrad.addColorStop(0, 'rgba(56, 189, 248, 0.45)');
+    glowGrad.addColorStop(0.8, 'rgba(14, 165, 233, 0.15)');
+    glowGrad.addColorStop(1, 'rgba(2, 132, 199, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 88, 24, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Rotating Neon Ring Dots on Pedestal
+    for (let i = 0; i < 8; i++) {
+      const a = t * 1.5 + (i * Math.PI * 2) / 8;
+      const rx = cx + Math.cos(a) * 82;
+      const ry = cy + Math.sin(a) * 22;
+      ctx.fillStyle = '#38bdf8';
+      circ(ctx, rx, ry, 3);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Render Previewed Chicken with Draft Config
+    const ch = getChicken(lockerChickenId);
+    const vis = getChickenVisual(lockerChickenId, lockerDraftConfig);
+    const bob = Math.sin(t * 3.5) * 6;
+    drawChicken(ctx, {
+      x: cx,
+      y: cy - 45 + bob,
+      r: 68,
+      aim: 0,
+      t: t,
+      moving: false,
+      body: vis.body,
+      wing: vis.wing,
+      comb: vis.comb,
+      hat: vis.hat,
+      hatCol: vis.hatCol,
+      gemCol: vis.gemCol,
+      shoe: vis.shoe,
+      outfit: vis.outfit,
+      shades: vis.shades,
+      worldIdx: ch.worldId,
+      gun: 'pistol',
+      recoil: (t * 2.5) % 1 < 0.15 ? 0.35 : 0
+    });
+
+    lockerAnimId = requestAnimationFrame(renderLockerFrame);
+  }
+
+  if (lockerAnimId) cancelAnimationFrame(lockerAnimId);
+  lockerAnimId = requestAnimationFrame(renderLockerFrame);
+}
+
+function saveLockerSkin() {
+  const isUnlocked = isAdminMode || Storage.profile.unlockedChickens.includes(lockerChickenId);
+  if (!isUnlocked) {
+    showSaveToast(currentLang === 'en' ? '🔒 Cannot equip locked chicken skin!' : '🔒 لا يمكنك استخدام سكن لم تفتحه بعد!');
+    Sfx.empty();
+    return;
+  }
+  if (!Storage.profile.customSkins) Storage.profile.customSkins = {};
+  Storage.profile.customSkins[lockerChickenId] = Object.assign({}, lockerDraftConfig);
+  try {
+    localStorage.setItem('cww_custom_skins_v1', JSON.stringify(Storage.profile.customSkins));
+  } catch (e) {}
+
+  // Equip this chicken and sync carousel preview so it immediately shows on the lobby stage
+  selectedChickenId = lockerChickenId;
+  Storage.profile.selectedChicken = lockerChickenId;
+  previewChickenIndex = CHICKENS.findIndex(c => c.id === lockerChickenId);
+  if (previewChickenIndex < 0) previewChickenIndex = 0;
+
+  try {
+    const raw = localStorage.getItem('cww_profile_v1');
+    const profObj = raw ? JSON.parse(raw) : {};
+    profObj.selectedChicken = lockerChickenId;
+    profObj.customSkins = Storage.profile.customSkins;
+    localStorage.setItem('cww_profile_v1', JSON.stringify(profObj));
+  } catch (e) {}
+  if (!isAdminMode) Storage.saveProfile();
+
+  closeLockerModal();
+  updateChickenCarouselUI();
+  refreshMenuUI();
+  if (typeof populateAdminSwapper === 'function') populateAdminSwapper();
+  if (typeof Sfx.equip === 'function') Sfx.equip(); else Sfx.unlock();
+  showSaveToast(currentLang === 'en' ? 'Skin customized & equipped! ✨' : 'تم حفظ المظهر وتجهيز الدجاجة! ✨');
+}
+
+function resetLockerSkin() {
+  lockerDraftConfig = Object.assign({}, DEFAULT_CUSTOM_SKINS[lockerChickenId] || DEFAULT_CUSTOM_SKINS.classic);
+  delete lockerDraftConfig.body;
+  delete lockerDraftConfig.wing;
+  delete lockerDraftConfig.comb;
+  switchLockerTab(lockerActiveTab);
+  Sfx.swap();
+  showSaveToast(currentLang === 'en' ? '🔄 Reset to original skin!' : '🔄 تم استعادة المظهر الأصلي!');
+}
+
+function randomizeLockerSkin() {
+  const rCol = CUSTOM_OPTIONS.colors[Math.floor(Math.random() * CUSTOM_OPTIONS.colors.length)];
+  const rHat = CUSTOM_OPTIONS.hats[Math.floor(Math.random() * CUSTOM_OPTIONS.hats.length)];
+  const rShoe = CUSTOM_OPTIONS.shoes[Math.floor(Math.random() * CUSTOM_OPTIONS.shoes.length)];
+  const rOutfit = CUSTOM_OPTIONS.outfits[Math.floor(Math.random() * CUSTOM_OPTIONS.outfits.length)];
+
+  lockerDraftConfig = {
+    color: rCol.id,
+    hat: rHat.id,
+    hatCol: rHat.hatCol,
+    gemCol: rHat.gemCol,
+    shoe: rShoe.id,
+    outfit: rOutfit.id
+  };
+  switchLockerTab(lockerActiveTab);
+  Sfx.swap();
+  showSaveToast('🎲 تصميم عشوائي جديد!');
+}
+
+function switchLockerChar(dir) {
+  const availableChickens = CHICKENS.filter(c => isAdminMode || Storage.profile.unlockedChickens.includes(c.id));
+  if (availableChickens.length <= 1) {
+    Sfx.empty();
+    return;
+  }
+  const curIdx = availableChickens.findIndex(c => c.id === lockerChickenId);
+  const nextIdx = (curIdx + dir + availableChickens.length) % availableChickens.length;
+  lockerChickenId = availableChickens[nextIdx].id;
+  lockerDraftConfig = getCustomSkinConfig(lockerChickenId);
+  updateLockerCharHeader();
+  switchLockerTab(lockerActiveTab);
+  Sfx.swap();
+}
+
+if ($('btnCloseLockerModal')) $('btnCloseLockerModal').onclick = closeLockerModal;
+if ($('btnLockerCancel')) $('btnLockerCancel').onclick = closeLockerModal;
+if ($('btnLockerSave')) $('btnLockerSave').onclick = saveLockerSkin;
+if ($('btnLockerReset')) $('btnLockerReset').onclick = resetLockerSkin;
+if ($('btnLockerRandomize')) $('btnLockerRandomize').onclick = randomizeLockerSkin;
+if ($('btnLockerPrevChar')) $('btnLockerPrevChar').onclick = () => switchLockerChar(-1);
+if ($('btnLockerNextChar')) $('btnLockerNextChar').onclick = () => switchLockerChar(1);
+
+if ($('tabLockerColor')) $('tabLockerColor').onclick = () => switchLockerTab('color');
+if ($('tabLockerHat')) $('tabLockerHat').onclick = () => switchLockerTab('hat');
+if ($('tabLockerShoe')) $('tabLockerShoe').onclick = () => switchLockerTab('shoe');
+if ($('tabLockerOutfit')) $('tabLockerOutfit').onclick = () => switchLockerTab('outfit');
 
 function refreshMenuUI() {
   const prof = Storage.loadProfile();
@@ -3762,6 +4379,7 @@ function returnToGameFromShop() {
 function openShop() {
   state = 'shop'; mouse.down = false;
   autoSaveRun(true);
+  if ($('btnShopAdminLobby')) $('btnShopAdminLobby').classList.toggle('hidden', !isAdminMode);
   const isMidWave = !!waveActive;
   if ($('btnShopResume')) {
     $('btnShopResume').textContent = isMidWave ? t('shopReturnBattle', wave) : t('shopReturnField');
@@ -3883,6 +4501,7 @@ function showGameOver() {
     $('overBest').textContent = Storage.profile.highScore.toLocaleString('en-US');
     $('newBest').classList.add('hidden');
   }
+  if ($('btnOverAdminLobby')) $('btnOverAdminLobby').classList.toggle('hidden', !isAdminMode);
   showScreen('over');
 }
 
@@ -3918,12 +4537,19 @@ $('btnNextChicken').onclick = () => {
 };
 $('btnSelectChicken').onclick = () => {
   const ch = CHICKENS[previewChickenIndex];
-  if (Storage.profile.unlockedChickens.includes(ch.id)) {
+  if (isAdminMode || Storage.profile.unlockedChickens.includes(ch.id)) {
     selectedChickenId = ch.id;
     Storage.profile.selectedChicken = ch.id;
-    Storage.saveProfile();
+    try {
+      const raw = localStorage.getItem('cww_profile_v1');
+      const profObj = raw ? JSON.parse(raw) : {};
+      profObj.selectedChicken = ch.id;
+      localStorage.setItem('cww_profile_v1', JSON.stringify(profObj));
+    } catch (e) {}
+    if (!isAdminMode) Storage.saveProfile();
     Sfx.unlock();
     updateChickenCarouselUI();
+    if (typeof populateAdminSwapper === 'function') populateAdminSwapper();
     showSaveToast(t('selectedHero', ch.name));
   }
 };
@@ -3968,10 +4594,37 @@ if ($('btnExitToAdminBattle')) $('btnExitToAdminBattle').onclick = () => {
   exitAdminArenaToBattle();
   Sfx.swap();
 };
+if ($('btnExitArenaToAdminLobby')) $('btnExitArenaToAdminLobby').onclick = () => {
+  returnToAdminLobby();
+  Sfx.swap();
+};
 if ($('btnExitArenaToLobby')) $('btnExitArenaToLobby').onclick = () => {
   exitAdminArenaToLobby();
   Sfx.swap();
 };
+if ($('btnExitTrainingAdmin')) $('btnExitTrainingAdmin').onclick = () => {
+  returnToAdminLobby();
+  Sfx.swap();
+};
+if ($('btnPauseAdminLobby')) $('btnPauseAdminLobby').onclick = () => {
+  returnToAdminLobby();
+  Sfx.swap();
+};
+if ($('btnShopAdminLobby')) $('btnShopAdminLobby').onclick = () => {
+  returnToAdminLobby();
+  Sfx.swap();
+};
+if ($('btnOverAdminLobby')) $('btnOverAdminLobby').onclick = () => {
+  returnToAdminLobby();
+  Sfx.swap();
+};
+
+// Dedicated Admin VIP Lobby Launch Controls
+if ($('btnExitAdminLobby')) $('btnExitAdminLobby').onclick = exitAdminMode;
+if ($('btnAdminOpenPanelLobby')) $('btnAdminOpenPanelLobby').onclick = toggleAdminDrawer;
+if ($('btnAdminLaunchBattle')) $('btnAdminLaunchBattle').onclick = () => startGame(selectedStartingWorld || 0);
+if ($('btnAdminLaunchTraining')) $('btnAdminLaunchTraining').onclick = () => startTrainingMode(selectedStartingWorld || 0);
+if ($('btnAdminLaunchArena')) $('btnAdminLaunchArena').onclick = () => enterSpecialAdminTrainingArena();
 if ($('btnResetArenaDPS')) $('btnResetArenaDPS').onclick = () => {
   resetTrainingDPS();
   Sfx.swap();
@@ -4026,45 +4679,83 @@ for (const b of document.querySelectorAll('.sfxBtn')) {
 }
 
 // =====================================================
-//   لوحة تحكم الأدمن والـ Sandbox (كود 33271107)
+//   لوحة تحكم الأدمن والـ Sandbox (كود 33271107) ولوبي المشرف VIP
 // =====================================================
 const ADMIN_SECRET = '33271107';
 
-function enterAdminMode() {
+function enterAdminLobby() {
   isAdminMode = true;
   adminGodMode = true;
   adminInfiniteAmmo = true;
-  $('admGodState').textContent = t('admEnabled');
-  $('admToggleGod').classList.add('active');
-  $('admAmmoState').textContent = t('admAmmoEnabled');
-  $('admToggleAmmo').classList.add('active');
+  if ($('admGodState')) $('admGodState').textContent = t('admEnabled');
+  if ($('admToggleGod')) $('admToggleGod').classList.add('active');
+  if ($('admAmmoState')) $('admAmmoState').textContent = t('admAmmoEnabled');
+  if ($('admToggleAmmo')) $('admToggleAmmo').classList.add('active');
 
   $('btnToggleAdminPanel').classList.remove('hidden');
-  $('adminPanel').classList.remove('hidden');
-  if (isTrainingMode) {
-    $('trainingAdminBar').classList.remove('hidden');
-  }
-
+  $('adminPanel').classList.add('hidden'); // Drawer tucked in until clicked
   populateAdminSwapper();
 
-  if (state === 'menu' || state === 'over') {
-    startGame(selectedStartingWorld || 0);
-  }
-  showBanner(t('admBannerOn'), t('admBannerOnSub'));
+  state = 'menu';
+  if ($('menu')) $('menu').classList.add('is-admin-lobby');
+  if ($('adminLobbyBanner')) $('adminLobbyBanner').classList.remove('hidden');
+  if ($('adminPlayCluster')) $('adminPlayCluster').classList.remove('hidden');
+  if ($('btnPlay')) $('btnPlay').classList.add('hidden');
+  if ($('btnResumeRun')) $('btnResumeRun').classList.add('hidden');
+
+  renderWorldCards();
+  updateChickenCarouselUI();
+  showScreen('menu');
+
+  showBanner('🛡️ تم تفعيل لوبي المشرف VIP!', 'جميع المابات والخيارات والـ Sandbox مفتوحة فوراً 🔓');
   showSaveToast(t('admActiveToast'));
+}
+
+function returnToAdminLobby() {
+  player = null; enemies = []; bullets = []; lobs = []; pickups = []; boss = null;
+  isTrainingMode = false;
+  isAdminTrainingArena = false;
+  savedAdminBattleState = null;
+  if ($('adminArenaHUD')) $('adminArenaHUD').classList.add('hidden');
+  if ($('trainingHUD')) $('trainingHUD').classList.add('hidden');
+  if ($('trainingAdminBar')) $('trainingAdminBar').classList.add('hidden');
+  if ($('shop')) $('shop').classList.add('hidden');
+  if ($('pause')) $('pause').classList.add('hidden');
+  if ($('over')) $('over').classList.add('hidden');
+
+  enterAdminLobby();
+}
+
+function enterAdminMode() {
+  if (state === 'menu' || state === 'over') {
+    enterAdminLobby();
+  } else {
+    isAdminMode = true;
+    adminGodMode = true;
+    adminInfiniteAmmo = true;
+    $('btnToggleAdminPanel').classList.remove('hidden');
+    $('adminPanel').classList.remove('hidden');
+    populateAdminSwapper();
+    showBanner(t('admBannerOn'), t('admBannerOnSub'));
+    showSaveToast(t('admActiveToast'));
+  }
 }
 
 function exitAdminMode() {
   isAdminMode = false;
   adminGodMode = false;
   adminInfiniteAmmo = false;
-  $('admGodState').textContent = t('admDisabled');
-  $('admToggleGod').classList.remove('active');
-  $('admAmmoState').textContent = t('admDisabled');
-  $('admToggleAmmo').classList.remove('active');
+  if ($('admGodState')) $('admGodState').textContent = t('admDisabled');
+  if ($('admToggleGod')) $('admToggleGod').classList.remove('active');
+  if ($('admAmmoState')) $('admAmmoState').textContent = t('admDisabled');
+  if ($('admToggleAmmo')) $('admToggleAmmo').classList.remove('active');
 
   $('btnToggleAdminPanel').classList.add('hidden');
   $('adminPanel').classList.add('hidden');
+  if ($('adminLobbyBanner')) $('adminLobbyBanner').classList.add('hidden');
+  if ($('adminPlayCluster')) $('adminPlayCluster').classList.add('hidden');
+  if ($('menu')) $('menu').classList.remove('is-admin-lobby');
+  if ($('btnPlay')) $('btnPlay').classList.remove('hidden');
   if ($('adminArenaHUD')) $('adminArenaHUD').classList.add('hidden');
   if ($('trainingHUD')) $('trainingHUD').classList.add('hidden');
   isAdminTrainingArena = false;
@@ -4081,7 +4772,7 @@ function handleAdminLogin() {
   if (code === ADMIN_SECRET) {
     $('adminModal').classList.add('hidden');
     $('adminErrorMsg').classList.add('hidden');
-    enterAdminMode();
+    enterAdminLobby();
   } else {
     $('adminErrorMsg').classList.remove('hidden');
     Sfx.empty();
@@ -4113,7 +4804,15 @@ $('btnToggleCodeVis').onclick = () => {
 };
 
 // Admin FAB & Drawer
-$('btnToggleAdminPanel').onclick = () => $('adminPanel').classList.toggle('hidden');
+function toggleAdminDrawer() {
+  const panel = $('adminPanel');
+  if (!panel) return;
+  const isHidden = panel.classList.toggle('hidden');
+  if (!isHidden) {
+    populateAdminSwapper();
+  }
+}
+$('btnToggleAdminPanel').onclick = toggleAdminDrawer;
 $('btnCloseAdminPanel').onclick = () => $('adminPanel').classList.add('hidden');
 $('admExitSandbox').onclick = exitAdminMode;
 
@@ -4254,47 +4953,125 @@ $('admBtnWarp').onclick = () => {
 // Chicken & Style Swapper
 function populateAdminSwapper() {
   const cSel = $('admChickenSelect');
+  if (!cSel) return;
+  const currentId = (player && player.chicken) || selectedChickenId || 'classic';
   cSel.innerHTML = '';
   CHICKENS.forEach(ch => {
     const opt = document.createElement('option');
     opt.value = ch.id;
     opt.textContent = `${ch.icon} ${ch.name}`;
-    if (player && player.chicken === ch.id) opt.selected = true;
+    if (ch.id === currentId) opt.selected = true;
     cSel.appendChild(opt);
   });
   updateAdminStyleOptions();
-  cSel.onchange = updateAdminStyleOptions;
+  cSel.onchange = () => {
+    updateAdminStyleOptions();
+    if (state === 'menu') {
+      selectedChickenId = cSel.value;
+      Storage.profile.selectedChicken = cSel.value;
+      previewChickenIndex = CHICKENS.findIndex(c => c.id === cSel.value);
+      if (previewChickenIndex < 0) previewChickenIndex = 0;
+      updateChickenCarouselUI();
+    }
+  };
 }
+
 function updateAdminStyleOptions() {
   const cSel = $('admChickenSelect');
   const sSel = $('admStyleSelect');
+  if (!cSel || !sSel) return;
+  const cId = cSel.value || selectedChickenId || 'classic';
   sSel.innerHTML = '';
-  const ch = getChicken(cSel.value);
-  (ch.styles || []).forEach((st, idx) => {
+
+  // 1. Current custom skin option
+  const optCustom = document.createElement('option');
+  optCustom.value = 'custom';
+  optCustom.textContent = currentLang === 'en' ? '🎨 Current Custom Skin' : '🎨 المظهر المخصص الحالي (Locker)';
+  optCustom.selected = true;
+  sSel.appendChild(optCustom);
+
+  // 2. Default original skin option
+  const optDef = document.createElement('option');
+  optDef.value = 'default';
+  optDef.textContent = currentLang === 'en' ? '⭐ Default Original Look' : '⭐ المظهر الأصلي الافتراضي';
+  sSel.appendChild(optDef);
+
+  // 3. Preset skins
+  CUSTOM_OPTIONS.presets.forEach((p, idx) => {
     const opt = document.createElement('option');
-    opt.value = idx;
-    opt.textContent = `${t('stylePrefix')} ${idx + 1}: ${st.name}`;
-    if (player && player.styleIndex === idx) opt.selected = true;
+    opt.value = `preset_${idx}`;
+    opt.textContent = currentLang === 'en' ? p.name_en : p.name_ar;
     sSel.appendChild(opt);
   });
 }
-$('admBtnApplyChar').onclick = () => {
-  const cId = $('admChickenSelect').value;
-  const sIdx = parseInt($('admStyleSelect').value) || 0;
-  if (player) {
-    player.chicken = cId;
-    player.styleIndex = sIdx;
+
+if ($('admBtnApplyChar')) {
+  $('admBtnApplyChar').onclick = () => {
+    const cSel = $('admChickenSelect');
+    const sSel = $('admStyleSelect');
+    if (!cSel || !sSel) return;
+    const cId = cSel.value;
+    const sVal = sSel.value;
     const ch = getChicken(cId);
-    player.baseSpeed = ch.id === 'astro' ? 315 : (ch.id === 'desert' ? 280 : 265);
-    const hpBase = ch.id === 'classic' ? 120 : 100;
-    player.maxHp = hpBase + player.up.hp * 20;
-    player.hp = Math.min(player.hp, player.maxHp);
-    for (const w of WEAPONS) player.ammo[w.id] = magSize(w, cId);
+
+    if (!Storage.profile.customSkins) Storage.profile.customSkins = {};
+    let styleLabel = currentLang === 'en' ? 'Custom' : 'المخصص';
+
+    if (sVal === 'default') {
+      Storage.profile.customSkins[cId] = Object.assign({}, DEFAULT_CUSTOM_SKINS[cId] || DEFAULT_CUSTOM_SKINS.classic);
+      styleLabel = currentLang === 'en' ? 'Default' : 'الافتراضي';
+    } else if (sVal.startsWith('preset_')) {
+      const pIdx = parseInt(sVal.split('_')[1], 10);
+      const p = CUSTOM_OPTIONS.presets[pIdx];
+      if (p) {
+        const hatItem = CUSTOM_OPTIONS.hats.find(h => h.id === p.hat);
+        Storage.profile.customSkins[cId] = {
+          color: p.color,
+          hat: p.hat,
+          shoe: p.shoe,
+          outfit: p.outfit,
+          hatCol: (hatItem && hatItem.hatCol) || null,
+          gemCol: (hatItem && hatItem.gemCol) || null,
+          shades: false
+        };
+        styleLabel = currentLang === 'en' ? p.name_en : p.name_ar;
+      }
+    }
+
+    try {
+      localStorage.setItem('cww_custom_skins_v1', JSON.stringify(Storage.profile.customSkins));
+    } catch (e) {}
+
+    selectedChickenId = cId;
+    Storage.profile.selectedChicken = cId;
+    previewChickenIndex = CHICKENS.findIndex(c => c.id === cId);
+    if (previewChickenIndex < 0) previewChickenIndex = 0;
+
+    try {
+      const raw = localStorage.getItem('cww_profile_v1');
+      const profObj = raw ? JSON.parse(raw) : {};
+      profObj.selectedChicken = cId;
+      profObj.customSkins = Storage.profile.customSkins;
+      localStorage.setItem('cww_profile_v1', JSON.stringify(profObj));
+    } catch (e) {}
+    if (!isAdminMode) Storage.saveProfile();
+
+    if (player) {
+      player.chicken = cId;
+      player.baseSpeed = ch.id === 'astro' ? 315 : (ch.id === 'desert' ? 280 : 265);
+      const hpBase = ch.id === 'classic' ? 120 : 100;
+      player.maxHp = hpBase + player.up.hp * 20;
+      player.hp = Math.min(player.hp, player.maxHp);
+      for (const w of WEAPONS) player.ammo[w.id] = magSize(w, cId);
+      addText(player.x, player.y - 50, `${ch.icon} تم تطبيق ${ch.name}!`, '#38bdf8', 26);
+    }
+
+    updateChickenCarouselUI();
+    refreshMenuUI();
     Sfx.unlock();
-    addText(player.x, player.y - 50, `${ch.icon} تم تطبيق ${ch.name}!`, '#38bdf8', 26);
-    showSaveToast(t('admCharToast', ch.name, sIdx + 1));
-  }
-};
+    showSaveToast(currentLang === 'en' ? `Swapped to ${ch.name} (${styleLabel})! ✨` : `تم تبديل الشخصية إلى ${ch.icon} ${ch.name} (${styleLabel})! ✨`);
+  };
+}
 
 // Stat Tuning Sliders & Steppers
 function bindAdminStatSlider(sliderId, valId, key, formatFn) {
@@ -4394,6 +5171,7 @@ if ($('txtLobbyLogo')) {
 updateAllDOMTranslations();
 updateAudioButtons();
 refreshMenuUI();
+if (typeof populateAdminSwapper === 'function') populateAdminSwapper();
 
 function handleRouteHash() {
   const url = window.location.href;
@@ -4436,7 +5214,7 @@ const mc = $('menuChicken'), mg = mc.getContext('2d');
 function drawMenuChicken(t) {
   mg.clearRect(0, 0, mc.width, mc.height);
   const ch = CHICKENS[previewChickenIndex] || CHICKENS[0];
-  const vis = getChickenVisual(ch.id, selectedStyles[ch.id] || 0);
+  const vis = getChickenVisual(ch.id);
   const unlocked = Storage.profile.unlockedChickens.includes(ch.id);
   const r = 46, x = 125, y = 115, aim = -0.12 + Math.sin(t * 1.8) * 0.12;
   const s = r / 22, reach = 58 * s;
@@ -4513,7 +5291,9 @@ function drawMenuChicken(t) {
   drawChicken(mg, {
     x, y, r, aim, t, moving: false,
     body: vis.body, wing: vis.wing, comb: vis.comb,
-    gun: chGun, hat: vis.hat, hatCol: vis.hatCol, gemCol: vis.gemCol, shades: vis.shades,
+    gun: chGun, hat: vis.hat, hatCol: vis.hatCol, gemCol: vis.gemCol,
+    shoe: vis.shoe, outfit: vis.outfit, shades: vis.shades,
+    worldIdx: ch.worldId,
     recoil: (t * 3) % 1 < 0.2 ? 0.5 : 0,
     alpha: unlocked ? 1 : 0.45
   });

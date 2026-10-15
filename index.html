@@ -70,6 +70,9 @@
       </div>
 
       <div class="training-top-actions">
+        <button id="btnExitTrainingAdmin" class="btn-training-exit btn-admin-exit hidden" title="الخروج إلى لوبي الأدمن VIP">
+          🛡️ <span id="txtExitTrainingAdmin">لوبي الأدمن</span>
+        </button>
         <button id="btnExitTraining" class="btn-training-exit" title="الخروج للوبي الرئيسي">
           🚪 <span id="txtExitTraining">العودة للوبي</span>
         </button>
@@ -82,15 +85,18 @@
 
   <!-- ===== Dedicated Special Admin Training Arena Overlay ===== -->
   <div id="adminArenaHUD" class="admin-arena-hud hidden">
-    <!-- Top Bar: Two Exit Buttons + Arena Badge + Live DPS -->
+    <!-- Top Bar: Navigation Buttons + Arena Badge + Live DPS -->
     <div class="admin-arena-topbar">
-      <!-- Two Exit Buttons Requested by User -->
+      <!-- Return Buttons Requested by User -->
       <div class="admin-arena-nav-btns">
         <button id="btnExitToAdminBattle" class="btn-arena-nav btn-return-battle" title="العودة لموجات ومعارك طور المشرف العادي">
-          ⚔️ <span id="txtExitToAdminBattle">العودة للأدمن العادي</span>
+          ⚔️ <span id="txtExitToAdminBattle">معركة الأدمن</span>
         </button>
-        <button id="btnExitArenaToLobby" class="btn-arena-nav btn-return-lobby" title="الخروج إلى القائمة الرئيسية (اللوبي)">
-          🏠 <span id="txtExitArenaToLobby">العودة للوبي</span>
+        <button id="btnExitArenaToAdminLobby" class="btn-arena-nav btn-admin-exit" title="العودة إلى لوبي الأدمن VIP">
+          🛡️ <span id="txtExitArenaToAdminLobby">لوبي الأدمن</span>
+        </button>
+        <button id="btnExitArenaToLobby" class="btn-arena-nav btn-return-lobby" title="الخروج إلى اللوبي العادي">
+          🏠 <span id="txtExitArenaToLobby">اللوبي العادي</span>
         </button>
       </div>
 
@@ -253,6 +259,22 @@
   <div id="menu" class="screen lobby-screen hidden">
     <div class="lobby-container">
       
+      <!-- Dedicated Admin VIP Lobby Banner (Shown when in Admin Mode) -->
+      <div id="adminLobbyBanner" class="admin-lobby-banner hidden">
+        <div class="admin-banner-left">
+          <span class="admin-vip-pill">🛡️ VIP ADMIN • SANDBOX</span>
+          <span class="admin-banner-text" id="txtAdminBannerDesc">لوبي المشرف الخاص • جميع المابات والخيارات مفتوحة فوراً 🔓</span>
+        </div>
+        <div class="admin-banner-actions">
+          <button id="btnExitAdminLobby" class="btn small ghost white-border" title="الخروج إلى اللوبي العادي">
+            🏠 <span id="txtExitAdminLobby">العودة للوبي العادي</span>
+          </button>
+          <button id="btnAdminOpenPanelLobby" class="btn small yellow" title="فتح لوحة التحكم المنزلقة">
+            ⚙️ <span id="txtAdminDrawerLobby">لوحة التحكم</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Top Navigation & Status Bar -->
       <header class="lobby-topbar">
         <div class="lobby-brand">
@@ -373,10 +395,17 @@
               <span id="perkDesc" class="perk-desc">+15% قوة الرش وذخيرة إضافية</span>
             </div>
 
-            <!-- Styles / Outfits Switcher (Directly on the hero stage) -->
-            <div class="hero-styles-row">
-              <span class="style-label" id="txtStyleLabel">المظهر:</span>
-              <div id="chickenStyles" class="style-list"></div>
+            <!-- Hero Locker Customizer Launcher (Replaces the 4 static style buttons) -->
+            <div class="hero-customizer-row">
+              <button id="btnOpenLocker" class="btn yellow big pulse-glow hero-locker-btn" title="فتح خزانة السكنات وتصميم الدجاجة">
+                🎨 <span id="txtOpenLocker">تعديل وتصميم الدجاجة (خزانة السكنات)</span>
+              </button>
+              <div id="lockerSummaryPills" class="locker-summary-pills">
+                <span id="pillSkinColor" class="l-pill" title="اللون المختار">🎨 لون الريش</span>
+                <span id="pillSkinHat" class="l-pill" title="غطاء الرأس المختار">🎩 غطاء الرأس</span>
+                <span id="pillSkinShoe" class="l-pill" title="الحذاء المختار">👟 الحذاء</span>
+                <span id="pillSkinOutfit" class="l-pill" title="الملابس المختارة">🎽 الملابس</span>
+              </div>
             </div>
           </div>
         </section>
@@ -431,6 +460,22 @@
               <span class="play-main-txt" id="txtPlayBtn">انطلاق للمعركة ⚔️</span>
               <small class="play-sub-txt" id="txtPlaySub">READY / اضغط للبدء</small>
             </button>
+
+            <!-- Admin VIP Launch Cluster (Shown when in Admin Lobby) -->
+            <div id="adminPlayCluster" class="admin-play-cluster hidden">
+              <button id="btnAdminLaunchBattle" class="btn big green lobby-play-btn">
+                <span class="play-main-txt" id="txtAdminLaunchBattle">انطلاق للمعركة (ماب حر) ⚔️</span>
+                <small class="play-sub-txt" id="txtAdminLaunchBattleSub">بدء الباتل رويال في الماب المحدد بامتيازات المشرف</small>
+              </button>
+              <div class="admin-quick-launch-row">
+                <button id="btnAdminLaunchTraining" class="btn blue" title="دخول ميدان التدريب الفوري">
+                  🎯 <span id="txtAdminLaunchTraining">ميدان التدريب</span>
+                </button>
+                <button id="btnAdminLaunchArena" class="btn purple" title="دخول ساحة الأدمن الخاصة">
+                  ⭐ <span id="txtAdminLaunchArena">ساحة الأدمن الخاصة</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
@@ -452,6 +497,7 @@
       <div class="shop-actions">
         <button id="btnShopResume" class="btn big blue">🎮 العودة لميدان المعركة</button>
         <button id="btnNext" class="btn big">الموجة التالية ⚔️</button>
+        <button id="btnShopAdminLobby" class="btn yellow hidden">🛡️ لوبي الأدمن</button>
         <button id="btnShopSaveMenu" class="btn ghost">💾 حفظ وخروج للقائمة</button>
       </div>
     </div>
@@ -465,6 +511,7 @@
       <div class="col full-width">
         <button id="btnResume" class="btn big">كمّل اللعب ▶️</button>
         <button id="btnPauseShop" class="btn blue">🛒 دكان الأسلحة والعتاد (الشراء بالذرة)</button>
+        <button id="btnPauseAdminLobby" class="btn yellow hidden">🛡️ العودة للوبي الأدمن (VIP)</button>
         <button id="btnPauseSave" class="btn green">💾 حفظ الجولة والخروج</button>
         <div class="row-btns">
           <button class="btn blue musicBtn">🎵 الموسيقى: شغالة</button>
@@ -489,7 +536,110 @@
       </div>
       <div class="col">
         <button id="btnRetry" class="btn big">العب مرة ثانية 🔁</button>
+        <button id="btnOverAdminLobby" class="btn yellow hidden">🛡️ العودة للوبي الأدمن</button>
         <button id="btnOverMenu" class="btn ghost">القائمة الرئيسية</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Hero Locker & Skin Customizer Modal ===== -->
+  <div id="lockerModal" class="modal-overlay hidden">
+    <div class="card locker-modal-card">
+      <div class="locker-modal-header">
+        <div class="locker-header-titles">
+          <h2 id="txtLockerTitle">🎨 خزانة السكنات وتعديل الأبطال</h2>
+          <small id="txtLockerSub" class="tagline">صمم مظهر دجاجتك بالكامل: غيّر لون الريش، غطاء الرأس، الأحذية، والملابس بحرية تامة!</small>
+        </div>
+        <button id="btnCloseLockerModal" class="btn-close" title="إغلاق الخزانة">✕</button>
+      </div>
+
+      <div class="locker-modal-body">
+        <!-- Left Side: Interactive 3D Stage Preview -->
+        <div class="locker-preview-stage">
+          <div class="locker-canvas-container">
+            <div class="locker-spotlight"></div>
+            <canvas id="lockerCanvas" width="340" height="340"></canvas>
+            
+            <!-- Character switcher inside locker -->
+            <div class="locker-char-nav">
+              <button id="btnLockerPrevChar" class="stage-nav-btn prev-btn" title="الشخصية السابقة">◀</button>
+              <span id="lockerCharName" class="locker-char-title">🐔 رامبو المزرعة</span>
+              <button id="btnLockerNextChar" class="stage-nav-btn next-btn" title="الشخصية التالية">▶</button>
+            </div>
+          </div>
+
+          <!-- Presets and Randomizer -->
+          <div class="locker-presets-section">
+            <div class="locker-presets-head">
+              <span class="txtPresetsLabel">🌟 تصاميم جاهزة ومقترحة:</span>
+              <button id="btnLockerRandomize" class="btn-icon-pill" title="تصميم عشوائي ممتع">🎲 عشوائي</button>
+            </div>
+            <div id="lockerPresetsRow" class="locker-presets-row"></div>
+          </div>
+        </div>
+
+        <!-- Right Side: Customization Options & Tabs -->
+        <div class="locker-options-panel">
+          <!-- Category Tabs -->
+          <div class="locker-tabs-nav">
+            <button id="tabLockerColor" class="locker-tab-btn active" data-tab="color">
+              <span class="tab-icon">🎨</span>
+              <span id="txtTabColor">لون الريش</span>
+            </button>
+            <button id="tabLockerHat" class="locker-tab-btn" data-tab="hat">
+              <span class="tab-icon">🎩</span>
+              <span id="txtTabHat">غطاء الرأس</span>
+            </button>
+            <button id="tabLockerShoe" class="locker-tab-btn" data-tab="shoe">
+              <span class="tab-icon">👟</span>
+              <span id="txtTabShoe">الأحذية / الجوتي</span>
+            </button>
+            <button id="tabLockerOutfit" class="locker-tab-btn" data-tab="outfit">
+              <span class="tab-icon">🎽</span>
+              <span id="txtTabOutfit">الملابس والوشاح</span>
+            </button>
+          </div>
+
+          <!-- Tab Content Views -->
+          <div class="locker-tab-content">
+            <!-- 1. Color Palette Grid -->
+            <div id="lockerColorsView" class="locker-tab-view active">
+              <div class="tab-view-desc" id="txtColorDesc">اختر لون الريش والجسد للشخصية:</div>
+              <div id="lockerColorsGrid" class="locker-colors-grid"></div>
+            </div>
+
+            <!-- 2. Hats Grid -->
+            <div id="lockerHatsView" class="locker-tab-view hidden">
+              <div class="tab-view-desc" id="txtHatDesc">اختر القبعة أو الربطة أو غطاء الرأس المفضل:</div>
+              <div id="lockerHatsGrid" class="locker-items-grid"></div>
+            </div>
+
+            <!-- 3. Shoes Grid -->
+            <div id="lockerShoesView" class="locker-tab-view hidden">
+              <div class="tab-view-desc" id="txtShoeDesc">اختر نوع الحذاء أو الجوتي الرياضي:</div>
+              <div id="lockerShoesGrid" class="locker-items-grid"></div>
+            </div>
+
+            <!-- 4. Outfits Grid -->
+            <div id="lockerOutfitsView" class="locker-tab-view hidden">
+              <div class="tab-view-desc" id="txtOutfitDesc">اختر الفانيلة أو الوشاح أو الدرع الصدري:</div>
+              <div id="lockerOutfitsGrid" class="locker-items-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="locker-modal-footer">
+        <button id="btnLockerReset" class="btn ghost danger" title="استعادة المظهر الافتراضي للشخصية">
+          🔄 <span id="txtLockerReset">استعادة الأصلي</span>
+        </button>
+        <div class="locker-footer-right">
+          <button id="btnLockerCancel" class="btn ghost">إلغاء</button>
+          <button id="btnLockerSave" class="btn big green pulse-play">
+            ✔ <span id="txtLockerSave">حفظ وتجهيز السكن</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

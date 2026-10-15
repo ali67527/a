@@ -20,7 +20,175 @@ function ell(g, x, y, rx, ry, rot = 0) {
 
 function circ(g, x, y, r) { g.beginPath(); g.arc(x, y, Math.max(0.1, r), 0, TAU); }
 
-// o: {x,y,r,aim,t,moving,body,wing,comb,gun,hat,shades,angry,flash,wet,alpha,scale,ko,recoil,tail1,tail2}
+// Customizer Footwear rendering
+function drawShoes(g, r, shoe, face, legSwing, bob) {
+  if (!shoe || shoe === 'none') return false;
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  for (const s of [-1, 1]) {
+    const lx = s * r * 0.28, sw = legSwing * s;
+    const footX = lx + sw, footY = r * 0.88;
+    g.save();
+    if (shoe === 'sneakers') {
+      g.strokeStyle = '#1e293b'; g.lineWidth = Math.max(3, r * 0.16);
+      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(footX, footY); g.stroke();
+      g.fillStyle = '#0f172a'; g.strokeStyle = OUTLINE; g.lineWidth = 1.6;
+      rr(g, footX - r * 0.18, footY - r * 0.08, r * 0.36, r * 0.16, 3); g.fill(); g.stroke();
+      g.fillStyle = '#f8fafc'; circ(g, footX + r * 0.15 * face, footY - r * 0.01, r * 0.08); g.fill();
+      g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.2;
+      rr(g, footX - r * 0.2, footY + r * 0.04, r * 0.4, r * 0.06, 2); g.fill(); g.stroke();
+      g.strokeStyle = '#06b6d4'; g.lineWidth = 1.8;
+      g.beginPath(); g.moveTo(footX - r * 0.08 * face, footY - r * 0.04); g.lineTo(footX + r * 0.06 * face, footY - r * 0.04); g.stroke();
+    } else if (shoe === 'red_kicks') {
+      g.strokeStyle = '#dc2626'; g.lineWidth = Math.max(3, r * 0.16);
+      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(footX, footY); g.stroke();
+      g.fillStyle = '#dc2626'; g.strokeStyle = OUTLINE; g.lineWidth = 1.6;
+      rr(g, footX - r * 0.18, footY - r * 0.08, r * 0.36, r * 0.16, 3); g.fill(); g.stroke();
+      g.fillStyle = '#f8fafc'; circ(g, footX + r * 0.15 * face, footY - r * 0.01, r * 0.08); g.fill();
+      g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.2;
+      rr(g, footX - r * 0.2, footY + r * 0.04, r * 0.4, r * 0.06, 2); g.fill(); g.stroke();
+      g.strokeStyle = '#ffffff'; g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(footX - r * 0.08, footY - r * 0.04); g.lineTo(footX + r * 0.06, footY - r * 0.04); g.stroke();
+    } else if (shoe === 'cowboy_boots') {
+      g.strokeStyle = '#78350f'; g.lineWidth = Math.max(3.5, r * 0.18);
+      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(footX, footY); g.stroke();
+      g.fillStyle = '#78350f'; g.strokeStyle = '#451a03'; g.lineWidth = 1.6;
+      rr(g, footX - r * 0.18, footY - r * 0.08, r * 0.34, r * 0.18, 3); g.fill(); g.stroke();
+      g.fillStyle = '#451a03';
+      g.beginPath();
+      g.moveTo(footX + r * 0.12 * face, footY - r * 0.07);
+      g.lineTo(footX + r * 0.26 * face, footY + r * 0.01);
+      g.lineTo(footX + r * 0.12 * face, footY + r * 0.09);
+      g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#facc15'; circ(g, footX - r * 0.2 * face, footY + r * 0.02, r * 0.06); g.fill();
+    } else if (shoe === 'snow_boots') {
+      g.strokeStyle = '#0284c7'; g.lineWidth = Math.max(3, r * 0.18);
+      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(footX, footY); g.stroke();
+      g.fillStyle = '#0f172a'; g.strokeStyle = '#0284c7'; g.lineWidth = 1.6;
+      rr(g, footX - r * 0.18, footY - r * 0.06, r * 0.36, r * 0.18, 3); g.fill(); g.stroke();
+      g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.4;
+      ell(g, footX, footY - r * 0.12, r * 0.18, r * 0.09); g.fill(); g.stroke();
+      g.fillStyle = '#bae6fd'; rr(g, footX - r * 0.2, footY + r * 0.05, r * 0.4, r * 0.06, 2); g.fill();
+    } else if (shoe === 'magma_boots') {
+      g.strokeStyle = '#1c1917'; g.lineWidth = Math.max(3.5, r * 0.18);
+      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(footX, footY); g.stroke();
+      g.fillStyle = '#1c1917'; g.strokeStyle = '#7f1d1d'; g.lineWidth = 1.8;
+      rr(g, footX - r * 0.18, footY - r * 0.08, r * 0.36, r * 0.18, 2); g.fill(); g.stroke();
+      g.strokeStyle = '#ea580c'; g.lineWidth = 2.0;
+      g.beginPath(); g.moveTo(footX - r * 0.12, footY); g.lineTo(footX + r * 0.12, footY); g.stroke();
+      g.fillStyle = '#fde047'; circ(g, footX + r * 0.14 * face, footY, r * 0.06); g.fill();
+    } else if (shoe === 'gravity_boots') {
+      g.strokeStyle = '#334155'; g.lineWidth = Math.max(3, r * 0.18);
+      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(footX, footY); g.stroke();
+      g.fillStyle = '#0f172a'; g.strokeStyle = '#06b6d4'; g.lineWidth = 1.8;
+      rr(g, footX - r * 0.18, footY - r * 0.08, r * 0.38, r * 0.18, 3); g.fill(); g.stroke();
+      g.fillStyle = '#22d3ee'; rr(g, footX - r * 0.2, footY + r * 0.05, r * 0.42, r * 0.06, 2); g.fill();
+      g.fillStyle = '#ffffff'; circ(g, footX, footY - r * 0.01, r * 0.05); g.fill();
+    }
+    g.restore();
+  }
+  return true;
+}
+
+// Customizer Torso / Outfit rendering
+function drawOutfit(g, outfit, r, face, t, lw) {
+  if (!outfit || outfit === 'none') return false;
+  g.save();
+  if (outfit === 'ninja_gi') {
+    g.fillStyle = '#0f172a'; g.strokeStyle = '#334155'; g.lineWidth = 1.6;
+    ell(g, r * 0.12, r * 0.05, r * 0.74, r * 0.64); g.fill(); g.stroke();
+    g.strokeStyle = '#e2e8f0'; g.lineWidth = 2.0;
+    g.beginPath();
+    g.moveTo(r * 0.45, -r * 0.4);
+    g.lineTo(r * 0.08, r * 0.05);
+    g.lineTo(-r * 0.25, -r * 0.35);
+    g.stroke();
+    g.fillStyle = '#dc2626'; g.strokeStyle = '#991b1b'; g.lineWidth = 1.4;
+    rr(g, -r * 0.45, r * 0.15, r * 0.98, r * 0.16, 2); g.fill(); g.stroke();
+    const fl = Math.sin(t * 10) * r * 0.06;
+    g.beginPath();
+    g.moveTo(r * 0.15, r * 0.3);
+    g.lineTo(r * 0.24 + fl, r * 0.58);
+    g.lineTo(r * 0.12 + fl, r * 0.58);
+    g.closePath(); g.fill();
+  } else if (outfit === 'scarf') {
+    g.fillStyle = '#dc2626'; g.strokeStyle = '#991b1b'; g.lineWidth = 1.6;
+    ell(g, r * 0.28, -r * 0.42, r * 0.54, r * 0.24, 0.1); g.fill(); g.stroke();
+    const s1 = Math.sin(t * 12) * r * 0.12;
+    const s2 = Math.sin(t * 12 + 1.2) * r * 0.14;
+    g.beginPath();
+    g.moveTo(-r * 0.1, -r * 0.4);
+    g.quadraticCurveTo(-r * 0.6, -r * 0.4 + s1, -r * 1.15, -r * 0.2 + s1);
+    g.lineTo(-r * 1.05, -r * 0.05 + s1);
+    g.quadraticCurveTo(-r * 0.5, -r * 0.25 + s1 * 0.5, -r * 0.05, -r * 0.3);
+    g.closePath(); g.fill(); g.stroke();
+
+    g.beginPath();
+    g.moveTo(-r * 0.05, -r * 0.35);
+    g.quadraticCurveTo(-r * 0.5, -r * 0.25 + s2, -r * 0.95, -r * 0.05 + s2);
+    g.lineTo(-r * 0.88, r * 0.08 + s2);
+    g.quadraticCurveTo(-r * 0.4, -r * 0.12 + s2 * 0.5, 0, -r * 0.25);
+    g.closePath(); g.fill(); g.stroke();
+  } else if (outfit === 'parka') {
+    g.fillStyle = '#0369a1'; g.strokeStyle = '#0284c7'; g.lineWidth = 1.6;
+    ell(g, r * 0.1, r * 0.05, r * 0.76, r * 0.66); g.fill(); g.stroke();
+    g.strokeStyle = '#f8fafc'; g.lineWidth = 2.2;
+    g.beginPath(); g.moveTo(r * 0.2, -r * 0.35); g.lineTo(r * 0.2, r * 0.45); g.stroke();
+    g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.4;
+    for (let i = 0; i < 5; i++) {
+      circ(g, -r * 0.15 + i * r * 0.18, -r * 0.48, r * 0.18); g.fill(); g.stroke();
+    }
+  } else if (outfit === 'magma_armor') {
+    g.fillStyle = '#1c1917'; g.strokeStyle = '#7f1d1d'; g.lineWidth = 1.8;
+    ell(g, r * 0.12, r * 0.05, r * 0.74, r * 0.64); g.fill(); g.stroke();
+    g.strokeStyle = '#ea580c'; g.lineWidth = 2.6;
+    g.beginPath();
+    g.moveTo(-r * 0.3, -r * 0.3); g.lineTo(r * 0.45, r * 0.25);
+    g.moveTo(-r * 0.3, r * 0.25); g.lineTo(r * 0.45, -r * 0.3);
+    g.stroke();
+    g.fillStyle = '#f97316'; circ(g, r * 0.12, 0, r * 0.22); g.fill();
+    g.fillStyle = '#fde047'; circ(g, r * 0.12, 0, r * 0.12); g.fill();
+  } else if (outfit === 'space_suit') {
+    g.fillStyle = '#0f172a'; g.strokeStyle = '#22d3ee'; g.lineWidth = 1.8;
+    ell(g, r * 0.12, r * 0.05, r * 0.76, r * 0.66); g.fill(); g.stroke();
+    g.strokeStyle = '#06b6d4'; g.lineWidth = 1.8;
+    g.beginPath();
+    g.moveTo(-r * 0.25, -r * 0.2); g.lineTo(r * 0.1, -r * 0.2); g.lineTo(r * 0.35, 0);
+    g.moveTo(-r * 0.25, r * 0.2); g.lineTo(r * 0.1, r * 0.2); g.lineTo(r * 0.35, 0);
+    g.stroke();
+    g.fillStyle = '#22d3ee'; circ(g, r * 0.15, 0, r * 0.18); g.fill();
+    g.fillStyle = '#ffffff'; circ(g, r * 0.15, 0, r * 0.08); g.fill();
+  } else if (outfit === 'tshirt') {
+    g.fillStyle = '#3b82f6'; g.strokeStyle = '#1d4ed8'; g.lineWidth = 1.6;
+    ell(g, r * 0.12, r * 0.08, r * 0.75, r * 0.64); g.fill(); g.stroke();
+    g.fillStyle = '#ffffff';
+    ell(g, r * 0.28, -r * 0.38, r * 0.35, r * 0.16); g.fill();
+    g.fillStyle = '#60a5fa';
+    circ(g, r * 0.15, r * 0.05, r * 0.14); g.fill();
+    g.beginPath();
+    g.moveTo(r * 0.15, -r * 0.16);
+    g.lineTo(r * 0.05, r * 0.02);
+    g.lineTo(r * 0.25, r * 0.02);
+    g.closePath(); g.fill();
+  } else if (outfit === 'gold_chain') {
+    g.strokeStyle = '#facc15'; g.lineWidth = Math.max(2.5, r * 0.12);
+    g.beginPath();
+    g.arc(r * 0.22, -r * 0.2, r * 0.42, 0.2, Math.PI - 0.2);
+    g.stroke();
+    const dx = r * 0.22, dy = r * 0.24;
+    g.fillStyle = '#38bdf8'; g.strokeStyle = '#facc15'; g.lineWidth = 1.6;
+    g.beginPath();
+    g.moveTo(dx, dy - r * 0.16);
+    g.lineTo(dx + r * 0.14, dy);
+    g.lineTo(dx, dy + r * 0.18);
+    g.lineTo(dx - r * 0.14, dy);
+    g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#ffffff'; circ(g, dx - r * 0.04, dy - r * 0.04, r * 0.05); g.fill();
+  }
+  g.restore();
+  return true;
+}
+
+// o: {x,y,r,aim,t,moving,body,wing,comb,gun,hat,shoe,outfit,shades,angry,flash,wet,alpha,scale,ko,recoil,tail1,tail2}
 function drawChicken(g, o) {
   const r = o.r, t = o.t || 0;
   const face = Math.cos(o.aim) >= 0 ? 1 : -1;
@@ -41,76 +209,79 @@ function drawChicken(g, o) {
   const wIdx = o.worldIdx != null ? o.worldIdx : 0;
   const isDummy = !!o.isDummy;
 
-  // legs
+  // legs / customizer footwear
   const legSwing = o.moving ? Math.sin(walk) * r * 0.22 : 0;
-  if (isDummy) {
-    // Robot training dummy: hydraulic metal cylinder legs
-    g.strokeStyle = '#1e293b'; g.lineWidth = Math.max(3.5, r * 0.18); g.lineCap = 'round';
-    for (const s of [-1, 1]) {
-      const lx = s * r * 0.28, sw = legSwing * s;
-      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
-      g.fillStyle = '#0f172a'; circ(g, lx + sw, r * 0.88, r * 0.14); g.fill(); g.stroke();
-      g.fillStyle = '#00f0ff'; circ(g, lx + sw * 0.5, r * 0.68 - bob, r * 0.08); g.fill();
-    }
-  } else if (wIdx === 1) {
-    // Desert Mummy legs: wrapped in yellow/tan linen bandages with hanging ribbons
-    g.strokeStyle = '#fde68a'; g.lineWidth = Math.max(3, r * 0.14); g.lineCap = 'round';
-    for (const s of [-1, 1]) {
-      const lx = s * r * 0.28, sw = legSwing * s;
-      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
-      g.strokeStyle = '#b45309'; g.lineWidth = 1.4;
-      g.beginPath(); g.moveTo(lx - 2, r * 0.65 - bob); g.lineTo(lx + 3, r * 0.72 - bob); g.stroke();
-      g.strokeStyle = '#f59e0b'; g.lineWidth = Math.max(2, r * 0.11);
-      g.beginPath(); g.moveTo(lx + sw - r * 0.1 * face, r * 0.9); g.lineTo(lx + sw + r * 0.18 * face, r * 0.9); g.stroke();
-    }
-  } else if (wIdx === 2) {
-    // Snow Yeti / Eskimo: thick winter snow boots with white fluffy fur trim
-    for (const s of [-1, 1]) {
-      const lx = s * r * 0.28, sw = legSwing * s;
-      g.strokeStyle = '#0284c7'; g.lineWidth = Math.max(3, r * 0.18); g.lineCap = 'round';
-      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
-      // White fur cuff
-      g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.4;
-      ell(g, lx + sw * 0.5, r * 0.65 - bob, r * 0.16, r * 0.09); g.fill(); g.stroke();
-      // Boot sole
-      g.fillStyle = '#0f172a';
-      rr(g, lx + sw - r * 0.15, r * 0.84, r * 0.32, r * 0.14, 2); g.fill(); g.stroke();
-    }
-  } else if (wIdx === 3) {
-    // Volcano Magma Demon: black jagged obsidian drake talons with glowing red claws
-    g.strokeStyle = '#1c1917'; g.lineWidth = Math.max(3, r * 0.14); g.lineCap = 'round';
-    for (const s of [-1, 1]) {
-      const lx = s * r * 0.28, sw = legSwing * s;
-      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
-      // Sharp glowing red talons
-      g.fillStyle = '#ef4444'; g.strokeStyle = '#7f1d1d'; g.lineWidth = 1.2;
-      for (let k = -1; k <= 1; k++) {
-        g.beginPath();
-        g.moveTo(lx + sw + k * 3, r * 0.88);
-        g.lineTo(lx + sw + k * 4 + face * 5, r * 0.95);
-        g.lineTo(lx + sw + k * 2, r * 0.95);
-        g.closePath(); g.fill(); g.stroke();
+  const hasCustomShoe = drawShoes(g, r, o.shoe, face, legSwing, bob);
+  if (!hasCustomShoe) {
+    if (isDummy) {
+      // Robot training dummy: hydraulic metal cylinder legs
+      g.strokeStyle = '#1e293b'; g.lineWidth = Math.max(3.5, r * 0.18); g.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        const lx = s * r * 0.28, sw = legSwing * s;
+        g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
+        g.fillStyle = '#0f172a'; circ(g, lx + sw, r * 0.88, r * 0.14); g.fill(); g.stroke();
+        g.fillStyle = '#00f0ff'; circ(g, lx + sw * 0.5, r * 0.68 - bob, r * 0.08); g.fill();
       }
-    }
-  } else if (wIdx === 4) {
-    // Space Cyborg: articulated robotic titanium legs with neon cyan joints
-    g.strokeStyle = '#334155'; g.lineWidth = Math.max(3, r * 0.16); g.lineCap = 'round';
-    for (const s of [-1, 1]) {
-      const lx = s * r * 0.28, sw = legSwing * s;
-      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
-      // Cyan glowing knee servomotor
-      g.fillStyle = '#22d3ee'; circ(g, lx + sw * 0.5, r * 0.66 - bob, r * 0.09); g.fill();
-      // Magnetic anti-gravity boot pad
-      g.fillStyle = '#0f172a'; g.strokeStyle = '#06b6d4'; g.lineWidth = 1.5;
-      rr(g, lx + sw - r * 0.16, r * 0.85, r * 0.35, r * 0.12, 2); g.fill(); g.stroke();
-    }
-  } else {
-    // Classic Farm legs
-    g.strokeStyle = '#f59e0b'; g.lineWidth = Math.max(2, r * 0.11); g.lineCap = 'round';
-    for (const s of [-1, 1]) {
-      const lx = s * r * 0.28, sw = legSwing * s;
-      g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
-      g.beginPath(); g.moveTo(lx + sw - r * 0.1 * face, r * 0.9); g.lineTo(lx + sw + r * 0.18 * face, r * 0.9); g.stroke();
+    } else if (wIdx === 1) {
+      // Desert Mummy legs: wrapped in yellow/tan linen bandages with hanging ribbons
+      g.strokeStyle = '#fde68a'; g.lineWidth = Math.max(3, r * 0.14); g.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        const lx = s * r * 0.28, sw = legSwing * s;
+        g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
+        g.strokeStyle = '#b45309'; g.lineWidth = 1.4;
+        g.beginPath(); g.moveTo(lx - 2, r * 0.65 - bob); g.lineTo(lx + 3, r * 0.72 - bob); g.stroke();
+        g.strokeStyle = '#f59e0b'; g.lineWidth = Math.max(2, r * 0.11);
+        g.beginPath(); g.moveTo(lx + sw - r * 0.1 * face, r * 0.9); g.lineTo(lx + sw + r * 0.18 * face, r * 0.9); g.stroke();
+      }
+    } else if (wIdx === 2) {
+      // Snow Yeti / Eskimo: thick winter snow boots with white fluffy fur trim
+      for (const s of [-1, 1]) {
+        const lx = s * r * 0.28, sw = legSwing * s;
+        g.strokeStyle = '#0284c7'; g.lineWidth = Math.max(3, r * 0.18); g.lineCap = 'round';
+        g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
+        // White fur cuff
+        g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.4;
+        ell(g, lx + sw * 0.5, r * 0.65 - bob, r * 0.16, r * 0.09); g.fill(); g.stroke();
+        // Boot sole
+        g.fillStyle = '#0f172a';
+        rr(g, lx + sw - r * 0.15, r * 0.84, r * 0.32, r * 0.14, 2); g.fill(); g.stroke();
+      }
+    } else if (wIdx === 3) {
+      // Volcano Magma Demon: black jagged obsidian drake talons with glowing red claws
+      g.strokeStyle = '#1c1917'; g.lineWidth = Math.max(3, r * 0.14); g.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        const lx = s * r * 0.28, sw = legSwing * s;
+        g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
+        // Sharp glowing red talons
+        g.fillStyle = '#ef4444'; g.strokeStyle = '#7f1d1d'; g.lineWidth = 1.2;
+        for (let k = -1; k <= 1; k++) {
+          g.beginPath();
+          g.moveTo(lx + sw + k * 3, r * 0.88);
+          g.lineTo(lx + sw + k * 4 + face * 5, r * 0.95);
+          g.lineTo(lx + sw + k * 2, r * 0.95);
+          g.closePath(); g.fill(); g.stroke();
+        }
+      }
+    } else if (wIdx === 4) {
+      // Space Cyborg: articulated robotic titanium legs with neon cyan joints
+      g.strokeStyle = '#334155'; g.lineWidth = Math.max(3, r * 0.16); g.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        const lx = s * r * 0.28, sw = legSwing * s;
+        g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
+        // Cyan glowing knee servomotor
+        g.fillStyle = '#22d3ee'; circ(g, lx + sw * 0.5, r * 0.66 - bob, r * 0.09); g.fill();
+        // Magnetic anti-gravity boot pad
+        g.fillStyle = '#0f172a'; g.strokeStyle = '#06b6d4'; g.lineWidth = 1.5;
+        rr(g, lx + sw - r * 0.16, r * 0.85, r * 0.35, r * 0.12, 2); g.fill(); g.stroke();
+      }
+    } else {
+      // Classic Farm legs
+      g.strokeStyle = '#f59e0b'; g.lineWidth = Math.max(2, r * 0.11); g.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        const lx = s * r * 0.28, sw = legSwing * s;
+        g.beginPath(); g.moveTo(lx, r * 0.5 - bob); g.lineTo(lx + sw, r * 0.88); g.stroke();
+        g.beginPath(); g.moveTo(lx + sw - r * 0.1 * face, r * 0.9); g.lineTo(lx + sw + r * 0.18 * face, r * 0.9); g.stroke();
+      }
     }
   }
 
@@ -173,65 +344,70 @@ function drawChicken(g, o) {
   g.fillStyle = body;
   ell(g, 0, 0, r, r * 0.82); g.fill(); g.stroke();
 
-  // Custom body decorations per world & dummies
-  if (isDummy) {
-    // Overwatch practice bot: Center Bullseye Target & High-Tech Alloy Plating!
-    g.fillStyle = '#0f172a'; ell(g, r * 0.1, 0, r * 0.62, r * 0.62); g.fill(); g.stroke();
-    g.fillStyle = '#ea580c'; ell(g, r * 0.1, 0, r * 0.48, r * 0.48); g.fill(); // Orange ring
-    g.fillStyle = '#f8fafc'; ell(g, r * 0.1, 0, r * 0.34, r * 0.34); g.fill(); // White ring
-    g.fillStyle = '#ef4444'; ell(g, r * 0.1, 0, r * 0.20, r * 0.20); g.fill(); // Red center bullseye
-    g.fillStyle = '#ffffff'; circ(g, r * 0.1, 0, r * 0.08); g.fill(); // Center light
-    // Hazard caution stripes
-    g.strokeStyle = '#f59e0b'; g.lineWidth = 2.5;
-    g.beginPath();
-    g.moveTo(-r * 0.45, -r * 0.4); g.lineTo(-r * 0.2, -r * 0.15);
-    g.moveTo(-r * 0.25, -r * 0.45); g.lineTo(0, -r * 0.2);
-    g.stroke();
-  } else if (wIdx === 1) {
-    // Desert Mummy: wrapped linen bandage strips across the body + golden scarab medallion
-    g.strokeStyle = '#b45309'; g.lineWidth = 1.4;
-    g.beginPath();
-    g.moveTo(-r * 0.6, -r * 0.3); g.lineTo(r * 0.5, r * 0.4);
-    g.moveTo(-r * 0.5, r * 0.3); g.lineTo(r * 0.4, -r * 0.4);
-    g.moveTo(-r * 0.2, -r * 0.5); g.lineTo(r * 0.7, 0);
-    g.stroke();
-    // Golden Scarab medallion
-    g.fillStyle = '#facc15'; g.strokeStyle = '#78350f'; g.lineWidth = 1.2;
-    ell(g, r * 0.15, 0, r * 0.24, r * 0.32); g.fill(); g.stroke();
-    g.fillStyle = '#06b6d4'; circ(g, r * 0.15, 0, r * 0.1); g.fill();
-  } else if (wIdx === 2) {
-    // Snow: Fluffy white fur parka collar hugging the neck and back!
-    g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.6;
-    const furPuffs = [[-0.2, -0.6, 0.32], [0.1, -0.65, 0.34], [0.4, -0.55, 0.32], [0.65, -0.4, 0.28]];
-    for (const [px, py, pr] of furPuffs) {
-      circ(g, r * px, r * py, r * pr); g.fill(); g.stroke();
+  // Customizer Torso wear / Outfit
+  const hasCustomOutfit = drawOutfit(g, o.outfit, r, face, t, lw);
+
+  // Custom body decorations per world & dummies (shown when no custom outfit covers it)
+  if (!hasCustomOutfit) {
+    if (isDummy) {
+      // Overwatch practice bot: Center Bullseye Target & High-Tech Alloy Plating!
+      g.fillStyle = '#0f172a'; ell(g, r * 0.1, 0, r * 0.62, r * 0.62); g.fill(); g.stroke();
+      g.fillStyle = '#ea580c'; ell(g, r * 0.1, 0, r * 0.48, r * 0.48); g.fill(); // Orange ring
+      g.fillStyle = '#f8fafc'; ell(g, r * 0.1, 0, r * 0.34, r * 0.34); g.fill(); // White ring
+      g.fillStyle = '#ef4444'; ell(g, r * 0.1, 0, r * 0.20, r * 0.20); g.fill(); // Red center bullseye
+      g.fillStyle = '#ffffff'; circ(g, r * 0.1, 0, r * 0.08); g.fill(); // Center light
+      // Hazard caution stripes
+      g.strokeStyle = '#f59e0b'; g.lineWidth = 2.5;
+      g.beginPath();
+      g.moveTo(-r * 0.45, -r * 0.4); g.lineTo(-r * 0.2, -r * 0.15);
+      g.moveTo(-r * 0.25, -r * 0.45); g.lineTo(0, -r * 0.2);
+      g.stroke();
+    } else if (wIdx === 1) {
+      // Desert Mummy: wrapped linen bandage strips across the body + golden scarab medallion
+      g.strokeStyle = '#b45309'; g.lineWidth = 1.4;
+      g.beginPath();
+      g.moveTo(-r * 0.6, -r * 0.3); g.lineTo(r * 0.5, r * 0.4);
+      g.moveTo(-r * 0.5, r * 0.3); g.lineTo(r * 0.4, -r * 0.4);
+      g.moveTo(-r * 0.2, -r * 0.5); g.lineTo(r * 0.7, 0);
+      g.stroke();
+      // Golden Scarab medallion
+      g.fillStyle = '#facc15'; g.strokeStyle = '#78350f'; g.lineWidth = 1.2;
+      ell(g, r * 0.15, 0, r * 0.24, r * 0.32); g.fill(); g.stroke();
+      g.fillStyle = '#06b6d4'; circ(g, r * 0.15, 0, r * 0.1); g.fill();
+    } else if (wIdx === 2) {
+      // Snow: Fluffy white fur parka collar hugging the neck and back!
+      g.fillStyle = '#f8fafc'; g.strokeStyle = '#94a3b8'; g.lineWidth = 1.6;
+      const furPuffs = [[-0.2, -0.6, 0.32], [0.1, -0.65, 0.34], [0.4, -0.55, 0.32], [0.65, -0.4, 0.28]];
+      for (const [px, py, pr] of furPuffs) {
+        circ(g, r * px, r * py, r * pr); g.fill(); g.stroke();
+      }
+      // Ice crystal frost motif on belly
+      g.fillStyle = '#ffffff'; ell(g, r * 0.2, r * 0.2, r * 0.42, r * 0.28); g.fill();
+    } else if (wIdx === 3) {
+      // Volcano: Spiky cracked obsidian scales & glowing molten lava veins!
+      g.strokeStyle = '#f97316'; g.lineWidth = 2.2;
+      g.beginPath();
+      g.moveTo(-r * 0.4, -r * 0.2); g.lineTo(-r * 0.1, 0); g.lineTo(r * 0.3, -r * 0.1); g.lineTo(r * 0.5, r * 0.2);
+      g.moveTo(-r * 0.1, 0); g.lineTo(r * 0.1, r * 0.4);
+      g.stroke();
+      g.strokeStyle = '#fde047'; g.lineWidth = 1.2;
+      g.beginPath();
+      g.moveTo(-r * 0.4, -r * 0.2); g.lineTo(-r * 0.1, 0); g.lineTo(r * 0.3, -r * 0.1);
+      g.stroke();
+    } else if (wIdx === 4) {
+      // Space: Cybernetic titanium armor plating with glowing neon circuit paths!
+      g.strokeStyle = '#22d3ee'; g.lineWidth = 1.8;
+      g.beginPath();
+      g.moveTo(-r * 0.3, -r * 0.3); g.lineTo(r * 0.2, -r * 0.3); g.lineTo(r * 0.4, 0); g.lineTo(r * 0.1, r * 0.3);
+      g.stroke();
+      // Central Arc Reactor
+      g.fillStyle = '#06b6d4'; circ(g, r * 0.15, 0, r * 0.22); g.fill();
+      g.fillStyle = '#ffffff'; circ(g, r * 0.15, 0, r * 0.11); g.fill();
+    } else {
+      // Classic sunny belly sheen
+      g.fillStyle = 'rgba(255,255,255,0.35)';
+      ell(g, r * 0.22, r * 0.18, r * 0.5, r * 0.36); g.fill();
     }
-    // Ice crystal frost motif on belly
-    g.fillStyle = '#ffffff'; ell(g, r * 0.2, r * 0.2, r * 0.42, r * 0.28); g.fill();
-  } else if (wIdx === 3) {
-    // Volcano: Spiky cracked obsidian scales & glowing molten lava veins!
-    g.strokeStyle = '#f97316'; g.lineWidth = 2.2;
-    g.beginPath();
-    g.moveTo(-r * 0.4, -r * 0.2); g.lineTo(-r * 0.1, 0); g.lineTo(r * 0.3, -r * 0.1); g.lineTo(r * 0.5, r * 0.2);
-    g.moveTo(-r * 0.1, 0); g.lineTo(r * 0.1, r * 0.4);
-    g.stroke();
-    g.strokeStyle = '#fde047'; g.lineWidth = 1.2;
-    g.beginPath();
-    g.moveTo(-r * 0.4, -r * 0.2); g.lineTo(-r * 0.1, 0); g.lineTo(r * 0.3, -r * 0.1);
-    g.stroke();
-  } else if (wIdx === 4) {
-    // Space: Cybernetic titanium armor plating with glowing neon circuit paths!
-    g.strokeStyle = '#22d3ee'; g.lineWidth = 1.8;
-    g.beginPath();
-    g.moveTo(-r * 0.3, -r * 0.3); g.lineTo(r * 0.2, -r * 0.3); g.lineTo(r * 0.4, 0); g.lineTo(r * 0.1, r * 0.3);
-    g.stroke();
-    // Central Arc Reactor
-    g.fillStyle = '#06b6d4'; circ(g, r * 0.15, 0, r * 0.22); g.fill();
-    g.fillStyle = '#ffffff'; circ(g, r * 0.15, 0, r * 0.11); g.fill();
-  } else {
-    // Classic sunny belly sheen
-    g.fillStyle = 'rgba(255,255,255,0.35)';
-    ell(g, r * 0.22, r * 0.18, r * 0.5, r * 0.36); g.fill();
   }
 
   // head
@@ -425,7 +601,7 @@ function drawChicken(g, o) {
 }
 
 function drawHat(g, hat, hx, hy, hr, lw, t, col, gem) {
-  if (!hat) return;
+  if (!hat || hat === 'none') return;
   g.lineWidth = lw;
   if (hat === 'bandana') {
     g.strokeStyle = col || '#2563eb'; g.lineWidth = hr * 0.3;

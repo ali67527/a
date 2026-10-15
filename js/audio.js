@@ -117,6 +117,7 @@ const Sfx = (() => {
     whirlwind() { tone('sine', 150, 450, 0.35, 0.18); noise(0.35, 'bandpass', 800, 1600, 0.22, 3); },
     teleport() { tone('sine', 200, 1600, 0.25, 0.2); noise(0.2, 'bandpass', 3000, 800, 0.2, 4); },
     unlock() { [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => { tone('square', f, f, 0.18, 0.1, i * 0.1); tone('triangle', f / 2, f / 2, 0.3, 0.12, i * 0.1); }); },
+    equip() { [659, 880, 1047].forEach((f, i) => tone('triangle', f, f, 0.12, 0.14, i * 0.07)); },
     vortex() { tone('sawtooth', 80, 300, 0.6, 0.15); noise(0.6, 'bandpass', 400, 2000, 0.25, 3); },
     startMusic() { if (!ctx || musicTimer) return; nextNote = ctx.currentTime + 0.1; step = 0; musicTimer = setInterval(sched, 25); },
     toggleMusic() {
